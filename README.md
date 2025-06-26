@@ -6,7 +6,13 @@
 ![School](https://img.shields.io/badge/42-Barcelona-black)
 
 > A minimalist Bash-like shell built from scratch for the 42 School curriculum.  
-> Project in collaboration with `chrrodri` and `bsamy`.
+> Collaborative project by `chrrodri` and `bsamy`.
+
+---
+
+⚠️ **Notice:**  
+This repository is **a work in progress** and **temporarily public** **only** to allow collaborator access during development.  
+It is **not a reference implementation** and will be cleaned or made private once completed. Please do not clone or fork this code unless authorized.
 
 ---
 
@@ -160,7 +166,7 @@ t_command:
 * **chrrodri** — Original author, project structure & lexer/parser logic
 * **bsamy** — Partner from June 2025 onward, contributing to parsing, redirection, and exec logic
 
-Both students at **42 School Barcelona**.
+Both students at **42 School Barcelona**
 
 ---
 
@@ -216,3 +222,9 @@ Both students at **42 School Barcelona**.
 
 This project is for educational purposes as part of the 42 curriculum.
 It does not aim to replace production shells and should not be copied without understanding its internal design and learning goals.
+
+---
+
+📌 *Last updated: June 2025*
+
+```
