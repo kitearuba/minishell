@@ -159,6 +159,7 @@ int	main(int ac, char *argv[], char *envp[])
     (void)argv;
     if (init_minishell(&bash, envp))
         return (exit_failure(&bash));
+    read_history(".minishell_history");
     while (1)
     {
         line = readline("minishell $> ");
@@ -186,6 +187,7 @@ int	main(int ac, char *argv[], char *envp[])
         }
         free(line);
     }
+    write_history(".minishell_history");
     clear_history();
     free (bash.env);
     return (0);

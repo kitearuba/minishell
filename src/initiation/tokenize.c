@@ -33,21 +33,28 @@ static size_t  handle_redirection(const char *input, t_token **tokens, size_t i)
     if (input[i] == '>' && input [i + 1] == '>')
     {
         add_token(tokens, new_token(REDIRECT_APPEND, &input[i], 2));
-        return (i + 2);
+        i += 2;
     }
-    if (input[i] == '<' && input[i + 1] == '<')
+    else if (input[i] == '<' && input[i + 1] == '<')
     {
         add_token(tokens, new_token(HEREDOC, &input[i], 2));
-        return (input[i + 2]);
+        i += 2;
     }
-    if (input[i] == '>')
+    else if (input[i] == '>')
     {
-        add_token(tokens, new_token(REDIRECT_OUT, &input[i], 2));
-        return (input[i + 1]);
+        add_token(tokens, new_token(REDIRECT_OUT, &input[i], 1));
+        i++;
     }
-    add_token(tokens, new_token( REDIRECT_IN, &input[i], 1));
-    return (input[i + 1]);
+    else
+    {
+        add_token(tokens, new_token( REDIRECT_IN, &input[i], 1));
+        i++;
+    }
+    while (input[i] == ' ')
+        i++;
+    return (i);
 }
+
 
 static int handle_quotes(const char *input, t_token **tokens, size_t *i)
 {
