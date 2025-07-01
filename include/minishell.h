@@ -52,12 +52,18 @@ typedef struct	s_bash
 /*                              FUNCTION PROTOTYPES                           */
 /* ************************************************************************** */
 
+
+t_token *tokenize_input(const char *input);
+t_token *new_token(t_token_type type, const char *start, size_t len);
+void    add_token(t_token **head, t_token *new);
+size_t  handle_word(const char *input, t_token **tokens, size_t i);
+char	*extract_quoted_token(const char *line, size_t *index);
+
 // --- Built-ins and command execution ---
 int 		execute_command(char **argv, t_bash *bash);
 int	    	exec_external(char **args, t_bash *bash);
 int         is_builtin(const char *cmd);
 int         run_builtin(char **argv, t_bash *bash);
-t_token     *tokenize_input(const char *input);
 void        print_tokens(t_token *list);
 t_command   *parse_tokens(t_token *tokens);
 

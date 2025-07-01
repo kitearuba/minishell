@@ -22,39 +22,76 @@ void print_tokens(t_token *list)
     printf("NULL\n");
 }
 
-static t_token *new_token(t_token_type type, const char *start, size_t len)
+static size_t  handle_pipe(const char *input, t_token **tokens, size_t i)
 {
-    t_token *token;
-
-    token = malloc(sizeof(t_token));
-    if (!token)
-        return (NULL);
-    token->type = type;
-    token->value = ft_substr(start, 0, len);
-    token->next = NULL;
-    return (token);
+    add_token(tokens, new_token(PIPE, &input[i], 1));
+    return (i + 1);
 }
 
-static void add_token(t_token **head, t_token *new)
+static size_t  handle_redirection(const char *input, t_token **tokens, size_t i)
 {
-    t_token *temp;
-
-    temp = *head;
-    if (!temp)
+    if (input[i] == '>' && input [i + 1] == '>')
     {
-        *head =new;
-        return ;
+        add_token(tokens, new_token(REDIRECT_APPEND, &input[i], 2));
+        return (i + 2);
     }
-    while (temp->next)
-        temp = temp->next;
-    temp->next = new;
+    if (input[i] == '<' && input[i + 1] == '<')
+    {
+        add_token(tokens, new_token(HEREDOC, &input[i], 2));
+        return (input[i + 2]);
+    }
+    if (input[i] == '>')
+    {
+        add_token(tokens, new_token(REDIRECT_OUT, &input[i], 2));
+        return (input[i + 1]);
+    }
+    add_token(tokens, new_token( REDIRECT_IN, &input[i], 1));
+    return (input[i + 1]);
 }
 
-t_token *tokenize_input(const char *input)
+static int handle_quotes(const char *input, t_token **tokens, size_t *i)
 {
-    t_token *tokens;
-    size_t  i;
+    char            *quoted;
+    t_token_type    type;
+
+    quoted = extract_quoted_token(input, i);
+    if (!quoted)
+        return (0);
+    if (input[*i - 1] == '\'')
+        type = SINGLE_QUOTE;
+    else
+        type = DOUBLE_QUOTE;
+    add_token(tokens, new_token(type,quoted, ft_strlen(quoted)));
+    free(quoted);
+    return (1);
+}
+
+static size_t handle_env_var(const char *input, t_token **tokens, size_t i)
+{
     size_t  start;
+
+    if (input[i + 1] == '?')
+    {
+        add_token(tokens, new_token(ENV_VAR, &input[i], 2));
+        return (i + 2);
+    }
+    start = i + 1;
+    i = start;
+    while (input[i] && (ft_isalnum(input[i]) || input[i] == '_'))
+        i++;
+    if (i == start)
+    {
+        add_token(tokens, new_token(WORD, &input[i - 1], 1));
+        return (start);
+    }
+    add_token(tokens, new_token(ENV_VAR, &input[start - 1], i - start + 1));
+    return (i);
+}
+
+t_token	*tokenize_input(const char *input)
+{
+    t_token	*tokens;
+    size_t	i;
 
     tokens = NULL;
     i = 0;
@@ -62,18 +99,23 @@ t_token *tokenize_input(const char *input)
     {
         if (input[i] == ' ')
             i++;
-        else if  (input[i] == '|')
+        else if (input[i] == '|')
+            i = handle_pipe(input, &tokens, i);
+        else if (input[i] == '>' || input[i] == '<')
+            i = handle_redirection(input, &tokens, i);
+        else if (input[i] == '\'' || input[i] == '"')
         {
-            add_token(&tokens, new_token(PIPE, &input[i], 1));
-            i++;
+            if (!handle_quotes(input, &tokens, &i))
+            {
+                printf("Syntax error: unmatched quote\n");
+                free_tokens(tokens);
+                return (NULL);
+            }
         }
+        else if (input[i] == '$')
+            i = handle_env_var(input, &tokens, i);
         else
-        {
-            start = i;
-            while (input[i] && input[i] != ' ' && input[i] != '|')
-                i++;
-            add_token(&tokens, new_token(WORD, &input[start], i - start));
-        }
+            i = handle_word(input, &tokens, i);
     }
     return (tokens);
 }

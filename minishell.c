@@ -12,6 +12,29 @@
 
 #include "./include/minishell.h"
 
+/* ************************************************************************** */
+/*                                                                            */
+/*                                copy_envp                                   */
+/* ************************************************************************** */
+/*                                                                            */
+/*  Description:                                                              */
+/*  - Creates a deep copy of the environment variable array (envp)            */
+/*    by allocating a new NULL-terminated array of strings.                   */
+/*                                                                            */
+/*  Parameters:                                                               */
+/*  - envp: original environment variable array passed to main.               */
+/*                                                                            */
+/*  Return:                                                                   */
+/*  - Returns a pointer to the newly allocated environment array (char **).   */
+/*  - Returns NULL on memory allocation failure.                              */
+/*                                                                            */
+/*  Notes:                                                                    */
+/*  - Uses malloc and strdup (both allowed in 42 Minishell subject).          */
+/*  - Frees already-allocated entries on failure to prevent memory leaks.     */
+/*  - No forbidden functions are used.                                        */
+/*                                                                            */
+/* ************************************************************************** */
+
 static char	**copy_envp(char **envp)
 {
 	char	**local_envp;
@@ -41,6 +64,28 @@ static char	**copy_envp(char **envp)
 	return (local_envp);
 }
 
+/* ************************************************************************** */
+/*                                                                            */
+/*                                init_minishell                              */
+/* ************************************************************************** */
+/*                                                                            */
+/*  Description:                                                              */
+/*  - Initializes the bash struct by copying envp and setting exit_status.    */
+/*                                                                            */
+/*  Parameters:                                                               */
+/*  - bash: pointer to t_bash struct to initialize.                           */
+/*  - envp: environment variable array.                                       */
+/*                                                                            */
+/*  Return:                                                                   */
+/*  - Returns 0 on success.                                                   */
+/*  - Returns 1 if environment copy fails.                                    */
+/*                                                                            */
+/*  Notes:                                                                    */
+/*  - Relies on copy_envp() for environment duplication.                      */
+/*  - No forbidden functions used.                                            */
+/*                                                                            */
+/* ************************************************************************** */
+
 static int	init_minishell(t_bash *bash, char **envp)
 {
     bash->env = copy_envp(envp);
@@ -50,6 +95,26 @@ static int	init_minishell(t_bash *bash, char **envp)
     return (0);
 }
 
+/* ************************************************************************** */
+/*                                                                            */
+/*                                exit_failure                                */
+/* ************************************************************************** */
+/*                                                                            */
+/*  Description:                                                              */
+/*  - Prints an error message to stderr and frees the bash environment.       */
+/*                                                                            */
+/*  Parameters:                                                               */
+/*  - bash: pointer to t_bash struct with allocated environment.              */
+/*                                                                            */
+/*  Return:                                                                   */
+/*  - Always returns 1 to indicate failure.                                   */
+/*                                                                            */
+/*  Notes:                                                                    */
+/*  - Uses write() to print error to fd 2 (stderr), which is allowed.         */
+/*  - Ensures no memory leaks on early exit.                                  */
+/*                                                                            */
+/* ************************************************************************** */
+
 static int	exit_failure(t_bash *bash)
 {
 	write(2, "minishell: exit\n", 15);
@@ -57,6 +122,30 @@ static int	exit_failure(t_bash *bash)
 	return (1);
 }
 
+/* ************************************************************************** */
+/*                                                                            */
+/*                                   main                                     */
+/* ************************************************************************** */
+/*                                                                            */
+/*  Description:                                                              */
+/*  - Entry point for Minishell. Initializes bash environment, starts         */
+/*    an interactive loop with readline, tokenizes input, and handles         */
+/*    graceful exit on EOF (Ctrl+D).                                          */
+/*                                                                            */
+/*  Parameters:                                                               */
+/*  - ac: argument count (unused).                                            */
+/*  - argv: argument vector (unused).                                         */
+/*  - envp: environment variable array passed to the shell.                   */
+/*                                                                            */
+/*  Return:                                                                   */
+/*  - Returns 0 on normal exit.                                               */
+/*  - Returns 1 on initialization failure.                                    */
+/*                                                                            */
+/*  Notes:                                                                    */
+/*  - Uses readline and add_history (both allowed).                           */
+/*  - Commented code indicates future plans for parsing and execution.        */
+/*                                                                            */
+/* ************************************************************************** */
 int	main(int ac, char *argv[], char *envp[])
 {
 	char	*line;
@@ -80,10 +169,11 @@ int	main(int ac, char *argv[], char *envp[])
         }
         if (*line)
         {
+            add_history(line);
             tokens = tokenize_input(line);
-            print_tokens(tokens);
-            free_tokens(tokens);
-            add_history(line);/*
+            if (tokens)
+                print_tokens(tokens);
+            free_tokens(tokens);/*
             args = ft_split(line, ' ');
             while (args[i])
             {

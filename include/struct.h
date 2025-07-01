@@ -10,7 +10,8 @@ typedef enum e_token_type
     REDIRECT_APPEND,
     HEREDOC,
     SINGLE_QUOTE,
-    DOUBLE_QUOTE
+    DOUBLE_QUOTE,
+    ENV_VAR
 }	t_token_type;
 
 typedef struct s_token

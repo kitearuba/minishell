@@ -34,6 +34,7 @@ DEPS            = $(HEADER) $(MAKEFILE)
 # **************************************************************************** #
 SRC = 	minishell.c \
 		$(SRC_DIR)/initiation/tokenize.c \
+		$(SRC_DIR)/initiation/tokenizer_utils.c \
 		$(SRC_DIR)/env/ft_getenv.c \
 		$(SRC_DIR)/utils/free_2d_array.c \
 		$(SRC_DIR)/utils/free_tokens.c \
