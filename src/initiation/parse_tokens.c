@@ -32,3 +32,24 @@ void    add_redirection(t_command *cmd, int type, char *filename)
         temp->next = redirection;
     }
 }
+
+char    **list_to_argv (t_list *args)
+{
+    char    **argv:
+    int     count;
+    int     i;
+    t_list  *temp;
+
+    count = 0;
+    temp = args;
+    while (temp)
+    {
+        count++;
+        temp = temp->next;
+    }
+    argv = malloc(sizeof(char *) * (count + 1));
+    if (!argv)
+        return (NULL);
+    i = 0;
+    temp = args;
+}
