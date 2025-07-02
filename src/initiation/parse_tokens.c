@@ -1,17 +1,34 @@
 #include "../../include/minishell.h"
 
-t_command   *parse_tokens(t_token *tokens)
+t_command   *new_command(void)
 {
-    t_command   *head;
-    t_command   *curr;
-    t_command   *new_cmd;
+    t_command   *cmd;
 
-    head = NULL;
-    curr = NULL;
-    while (tokens)
+    cmd = malloc(sizeof(t_command));
+    if (!cmd)
+        return(NULL);
+    ft_memset(cmd, 0, sizeof(t_command));
+    return (cmd);
+}
+
+void    add_redirection(t_command *cmd, int type, char *filename)
+{
+    t_redirection   *redirection;
+    t_redirection   *temp;
+
+    redirection = malloc(sizeof(t_redirection));
+    if (!redirection)
+        return ;
+    ft_memset(redirection, 0, sizeof(t_redirection));
+    redirection->type = type;
+    redirection->filename = ft_strdup(filename);
+    if (!cmd->redirection)
+        cmd->redirection = redirection;
+    else
     {
-        new_cmd = malloc(sizeof(t_command));
-        if (!new_cmd)
-            return(NULL);
+        temp = cmd->redirection;
+        while (temp->next)
+            temp = temp->next;
+        temp->next = redirection;
     }
 }

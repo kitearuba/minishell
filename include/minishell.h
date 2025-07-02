@@ -52,29 +52,31 @@ typedef struct	s_bash
 /*                              FUNCTION PROTOTYPES                           */
 /* ************************************************************************** */
 
+// --- Tokenizer ---
+t_token		*tokenize_input(const char *input);
+t_token		*new_token(t_token_type type, const char *start, size_t len);
+void		add_token(t_token **head, t_token *new);
+size_t		handle_word(const char *input, t_token **tokens, size_t i);
+char		*extract_quoted_token(const char *line, size_t *index);
+void		print_tokens(t_token *list);
 
-t_token *tokenize_input(const char *input);
-t_token *new_token(t_token_type type, const char *start, size_t len);
-void    add_token(t_token **head, t_token *new);
-size_t  handle_word(const char *input, t_token **tokens, size_t i);
-char	*extract_quoted_token(const char *line, size_t *index);
+// --- Parser ---
+t_command	*parse_tokens(t_token *tokens);
 
-// --- Built-ins and command execution ---
-int 		execute_command(char **argv, t_bash *bash);
-int	    	exec_external(char **args, t_bash *bash);
-int         is_builtin(const char *cmd);
-int         run_builtin(char **argv, t_bash *bash);
-void        print_tokens(t_token *list);
-t_command   *parse_tokens(t_token *tokens);
+// --- Command Execution ---
+int			execute_command(char **argv, t_bash *bash);
+int			exec_external(char **args, t_bash *bash);
+int			is_builtin(const char *cmd);
+int			run_builtin(char **argv, t_bash *bash);
 
-// --- Command path resolution ---
-char	    *get_cmd_path(char *cmd, char **envp);
+// --- Command Path Resolution ---
+char		*get_cmd_path(char *cmd, char **envp);
 
-// --- Environment variable handling ---
-char	    *ft_getenv(char **envp, char *key);
+// --- Environment Variable Handling ---
+char		*ft_getenv(char **envp, char *key);
 
 // --- Utilities ---
 void	    free_2d_array(char **arr);
 void	    free_tokens(t_token *tokens);
 
-#endif //MINISHELL_H
+#endif /* MINISHELL_H */

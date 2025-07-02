@@ -1,5 +1,21 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   structs.h                                         :+:      :+:    :+:    */
+/*                                                    +:+ +:+         +:+     */
+/*   By: chrrodri <chrrodri@student.42barcelona.co  +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2025/05/20 16:21:19 by chrrodri          #+#    #+#             */
+/*   Updated: 2025/05/20 16:35:24 by chrrodri         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #ifndef STRUCTS_H
 # define STRUCTS_H
+
+/* ************************************************************************** */
+/*                                 ENUMS                                      */
+/* ************************************************************************** */
 
 typedef enum e_token_type
 {
@@ -14,6 +30,10 @@ typedef enum e_token_type
     ENV_VAR
 }	t_token_type;
 
+/* ************************************************************************** */
+/*                               STRUCTURES                                   */
+/* ************************************************************************** */
+
 typedef struct s_token
 {
     t_token_type		type;
@@ -23,15 +43,16 @@ typedef struct s_token
 
 typedef struct s_redirection
 {
-    t_token_type        type;
-    struct s_redirection  *next;
+    int					type;
+    char				*filename;
+    struct s_redir		*next;
 }   t_redirection;
 
 typedef struct s_command
 {
     char                **argv;
-    t_redirection       *redirs;
+    t_redirection       *redirection;
     struct s_command    *next;
 }   t_command;
 
-#endif
+#endif /* STRUCTS_H */

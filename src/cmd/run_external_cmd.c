@@ -1,11 +1,54 @@
 #include "../../include/minishell.h"
 
+/* ************************************************************************** */
+/*                                                                            */
+/*                        print_cmd_not_found                                */
+/* ************************************************************************** */
+/*                                                                            */
+/*  Description:                                                              */
+/*  - Prints an error message to stderr indicating that the specified         */
+/*    command was not found, using ft_printf_fd().                            */
+/*                                                                            */
+/*  Parameters:                                                               */
+/*  - cmd: the command that was not found.                                    */
+/*                                                                            */
+/*  Return:                                                                   */
+/*  - None.                                                                   */
+/*                                                                            */
+/*  Notes:                                                                    */
+/*  - Outputs to fd 2 (stderr) for proper error reporting.                    */
+/*                                                                            */
+/* ************************************************************************** */
 static void	print_cmd_not_found(char *cmd)
 {
-    ft_putstr_fd("minishell: command not found: ", 2);
-    ft_putendl_fd(cmd, 2);
+    ft_printf_fd(2, "minishell: command not found: %s\n", cmd);
 }
 
+
+/* ************************************************************************** */
+/*                                                                            */
+/*                            exec_external                                  */
+/* ************************************************************************** */
+/*                                                                            */
+/*  Description:                                                              */
+/*  - Executes an external command by searching for its executable path,      */
+/*    forking a child process, and running execve with the command arguments. */
+/*                                                                            */
+/*  Parameters:                                                               */
+/*  - args: NULL-terminated array of command arguments.                       */
+/*  - bash: pointer to the bash struct containing environment and status.     */
+/*                                                                            */
+/*  Return:                                                                   */
+/*  - Exit status of the executed command.                                    */
+/*  - Returns 127 if the command is not found, or 1 on fork/exec error.       */
+/*                                                                            */
+/*  Notes:                                                                    */
+/*  - Prints "command not found" errors with print_cmd_not_found() using      */
+/*    ft_printf_fd() to stderr.                                               */
+/*  - Uses perror() for fork or execve errors to display system messages.     */
+/*  - Updates bash->exit_status with the command’s exit code.                 */
+/*                                                                            */
+/* ************************************************************************** */
 int exec_external(char **args, t_bash *bash)
 {
     char	*cmd_path;

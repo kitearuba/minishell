@@ -12,6 +12,19 @@
 
 #include "../../include/minishell.h"
 
+/* ************************************************************************** */
+/*                                                                            */
+/*                               print_tokens                                 */
+/* ************************************************************************** */
+/*                                                                            */
+/*  Description:                                                              */
+/*  - Prints the token list to stdout in a formatted way for debugging,       */
+/*    showing each token's type and value.                                    */
+/*                                                                            */
+/*  Parameters:                                                               */
+/*  - list: pointer to the first token in the linked list.                    */
+/*                                                                            */
+/* ************************************************************************** */
 void print_tokens(t_token *list)
 {
     while (list)
@@ -22,12 +35,48 @@ void print_tokens(t_token *list)
     printf("NULL\n");
 }
 
+/* ************************************************************************** */
+/*                                                                            */
+/*                               handle_pipe                                  */
+/* ************************************************************************** */
+/*                                                                            */
+/*  Description:                                                              */
+/*  - Handles the '|' character by creating a PIPE token and adding it        */
+/*    to the token list.                                                      */
+/*                                                                            */
+/*  Parameters:                                                               */
+/*  - input: the user input string.                                           */
+/*  - tokens: pointer to the token list.                                      */
+/*  - i: current index in the input string.                                   */
+/*                                                                            */
+/*  Return:                                                                   */
+/*  - The updated index after processing the pipe.                            */
+/*                                                                            */
+/* ************************************************************************** */
 static size_t  handle_pipe(const char *input, t_token **tokens, size_t i)
 {
     add_token(tokens, new_token(PIPE, &input[i], 1));
     return (i + 1);
 }
 
+/* ************************************************************************** */
+/*                                                                            */
+/*                            handle_redirection                              */
+/* ************************************************************************** */
+/*                                                                            */
+/*  Description:                                                              */
+/*  - Detects and handles redirection operators (>, >>, <, <<), creates       */
+/*    corresponding tokens, and skips trailing spaces.                        */
+/*                                                                            */
+/*  Parameters:                                                               */
+/*  - input: the user input string.                                           */
+/*  - tokens: pointer to the token list.                                      */
+/*  - i: current index in the input string.                                   */
+/*                                                                            */
+/*  Return:                                                                   */
+/*  - The updated index after processing the redirection.                     */
+/*                                                                            */
+/* ************************************************************************** */
 static size_t  handle_redirection(const char *input, t_token **tokens, size_t i)
 {
     if (input[i] == '>' && input [i + 1] == '>')
@@ -55,7 +104,28 @@ static size_t  handle_redirection(const char *input, t_token **tokens, size_t i)
     return (i);
 }
 
-
+/* ************************************************************************** */
+/*                                                                            */
+/*                               handle_quotes                                */
+/* ************************************************************************** */
+/*                                                                            */
+/*  Description:                                                              */
+/*  - Extracts a quoted string starting at the current index, determines      */
+/*    if it is a single or double quote, and adds the corresponding token.    */
+/*                                                                            */
+/*  Parameters:                                                               */
+/*  - input: the user input string.                                           */
+/*  - tokens: pointer to the token list.                                      */
+/*  - i: pointer to the current index in the input string (updated in place). */
+/*                                                                            */
+/*  Return:                                                                   */
+/*  - 1 if a quoted token is successfully processed.                          */
+/*  - 0 if unmatched quote is detected.                                       */
+/*                                                                            */
+/*  Notes:                                                                    */
+/*  - Frees temporary extracted string after use.                             */
+/*                                                                            */
+/* ************************************************************************** */
 static int handle_quotes(const char *input, t_token **tokens, size_t *i)
 {
     char            *quoted;
@@ -73,6 +143,25 @@ static int handle_quotes(const char *input, t_token **tokens, size_t *i)
     return (1);
 }
 
+/* ************************************************************************** */
+/*                                                                            */
+/*                             handle_env_var                                 */
+/* ************************************************************************** */
+/*                                                                            */
+/*  Description:                                                              */
+/*  - Handles environment variable tokens starting with '$', including        */
+/*    special case for '$?'. Adds ENV_VAR tokens or falls back to WORD token  */
+/*    if variable name is invalid.                                            */
+/*                                                                            */
+/*  Parameters:                                                               */
+/*  - input: the user input string.                                           */
+/*  - tokens: pointer to the token list.                                      */
+/*  - i: current index in the input string.                                   */
+/*                                                                            */
+/*  Return:                                                                   */
+/*  - The updated index after processing the environment variable.            */
+/*                                                                            */
+/* ************************************************************************** */
 static size_t handle_env_var(const char *input, t_token **tokens, size_t i)
 {
     size_t  start;
@@ -95,6 +184,31 @@ static size_t handle_env_var(const char *input, t_token **tokens, size_t i)
     return (i);
 }
 
+/* ************************************************************************** */
+/*                                                                            */
+/*                             tokenize_input                                 */
+/* ************************************************************************** */
+/*                                                                            */
+/*  Description:                                                              */
+/*  - Main tokenizer loop. Iterates over input string, dispatches             */
+/*    characters to appropriate handlers to build the token list, and         */
+/*    returns the list of tokens.                                             */
+/*                                                                            */
+/*  Parameters:                                                               */
+/*  - input: the user input string.                                           */
+/*                                                                            */
+/*  Return:                                                                   */
+/*  - Pointer to the head of the token linked list.                           */
+/*  - Returns NULL if a syntax error occurs (e.g., unmatched quote).          */
+/*                                                                            */
+/*  Notes:                                                                    */
+/*  - Skips spaces.                                                           */
+/*  - Calls handle_pipe, handle_redirection, handle_quotes, handle_env_var,   */
+/*    or handle_word (not shown here) based on character.                     */
+/*  - Prints syntax errors (e.g., unmatched quotes) to stderr using           */
+/*    ft_printf_fd() before freeing tokens and returning NULL.                */
+/*                                                                            */
+/* ************************************************************************** */
 t_token	*tokenize_input(const char *input)
 {
     t_token	*tokens;
@@ -114,7 +228,7 @@ t_token	*tokenize_input(const char *input)
         {
             if (!handle_quotes(input, &tokens, &i))
             {
-                printf("Syntax error: unmatched quote\n");
+                ft_printf_fd(2, "minishell: syntax error: unmatched quote\n");
                 free_tokens(tokens);
                 return (NULL);
             }

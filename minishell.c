@@ -31,7 +31,6 @@
 /*  Notes:                                                                    */
 /*  - Uses malloc and strdup (both allowed in 42 Minishell subject).          */
 /*  - Frees already-allocated entries on failure to prevent memory leaks.     */
-/*  - No forbidden functions are used.                                        */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -77,12 +76,10 @@ static char	**copy_envp(char **envp)
 /*  - envp: environment variable array.                                       */
 /*                                                                            */
 /*  Return:                                                                   */
-/*  - Returns 0 on success.                                                   */
-/*  - Returns 1 if environment copy fails.                                    */
+/*  -- 0 on success, 1 if environment copy fails.                             */
 /*                                                                            */
 /*  Notes:                                                                    */
 /*  - Relies on copy_envp() for environment duplication.                      */
-/*  - No forbidden functions used.                                            */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -128,9 +125,9 @@ static int	exit_failure(t_bash *bash)
 /* ************************************************************************** */
 /*                                                                            */
 /*  Description:                                                              */
-/*  - Entry point for Minishell. Initializes bash environment, starts         */
-/*    an interactive loop with readline, tokenizes input, and handles         */
-/*    graceful exit on EOF (Ctrl+D).                                          */
+/*  - Entry point for Minishell. Initializes environment, loads command       */
+/*    history, starts an interactive loop with readline, tokenizes input,     */
+/*    and handles graceful exit on EOF (Ctrl+D).                              */
 /*                                                                            */
 /*  Parameters:                                                               */
 /*  - ac: argument count (unused).                                            */
@@ -138,12 +135,12 @@ static int	exit_failure(t_bash *bash)
 /*  - envp: environment variable array passed to the shell.                   */
 /*                                                                            */
 /*  Return:                                                                   */
-/*  - Returns 0 on normal exit.                                               */
-/*  - Returns 1 on initialization failure.                                    */
+/*  - 0 on normal exit, 1 on initialization failure.                          */
 /*                                                                            */
 /*  Notes:                                                                    */
-/*  - Uses readline and add_history (both allowed).                           */
-/*  - Commented code indicates future plans for parsing and execution.        */
+/*  - Uses readline, add_history, read_history, and write_history, which      */
+/*    are allowed by the Minishell subject.                                   */
+/*  - Commented code shows planned parsing/execution implementation.          */
 /*                                                                            */
 /* ************************************************************************** */
 int	main(int ac, char *argv[], char *envp[])
