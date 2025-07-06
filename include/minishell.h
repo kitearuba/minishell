@@ -67,6 +67,8 @@ int         last_token_is_pipe(t_token *tok);
 int	check_leading_pipe(t_token *tokens, t_command *head, t_command *current);
 int	check_trailing_pipe(t_token *tokens, t_command *head, t_command *current);
 int	check_commandless_redirection(t_command *head, t_command *current);
+int	check_consecutive_pipes(t_token *tok, t_command **current);
+int	check_initial_errors(t_token *tok);
 t_command *handle_parse_error(t_command *head, t_command *current);
 
 // --- Command Execution ---
