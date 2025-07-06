@@ -35,9 +35,13 @@ DEPS            = $(HEADER) $(MAKEFILE)
 SRC = 	minishell.c \
 		$(SRC_DIR)/initiation/tokenize.c \
 		$(SRC_DIR)/initiation/tokenizer_utils.c \
+		$(SRC_DIR)/initiation/parse_tokens.c \
+		$(SRC_DIR)/initiation/parse_utils.c \
+		$(SRC_DIR)/initiation/parser_checks.c \
 		$(SRC_DIR)/env/ft_getenv.c \
 		$(SRC_DIR)/utils/free_2d_array.c \
 		$(SRC_DIR)/utils/free_tokens.c \
+		$(SRC_DIR)/utils/free_commands.c \
 		$(SRC_DIR)/cmd/run_external_cmd.c \
 		$(SRC_DIR)/cmd/built_in.c \
 		$(SRC_DIR)/cmd/execute_commands.c \
@@ -49,7 +53,7 @@ SRC = 	minishell.c \
         $(SRC_DIR)/builtin/ft_unset.c \
         $(SRC_DIR)/builtin/ft_env.c \
         $(SRC_DIR)/builtin/ft_exit.c \
-        #$(SRC_DIR)/cmd/cmd.c \
+        $(SRC_DIR)/tests/print.c
 
 
 OBJ         = $(SRC:.c=.o)

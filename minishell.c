@@ -145,13 +145,14 @@ static int	exit_failure(t_bash *bash)
 /* ************************************************************************** */
 int	main(int ac, char *argv[], char *envp[])
 {
-	char	*line;
+	char        *line;
+	t_bash      bash;
+    t_token     *tokens;
+    t_command   *cmds;
     //char	**args;
-	t_bash	bash;
     //int     i;
-    t_token *tokens;
-
     //i =0;
+
     (void)ac;
     (void)argv;
     if (init_minishell(&bash, envp))
@@ -170,7 +171,17 @@ int	main(int ac, char *argv[], char *envp[])
             add_history(line);
             tokens = tokenize_input(line);
             if (tokens)
+            {
+                cmds = parse_tokens(tokens);
                 print_tokens(tokens);
+                if (cmds)
+                {
+                    print_commands(cmds);
+                    free_commands(cmds);
+                }
+                else
+                    ft_printf_fd(2, "Parse error: no commands generated\n");
+            }
             free_tokens(tokens);/*
             args = ft_split(line, ' ');
             while (args[i])

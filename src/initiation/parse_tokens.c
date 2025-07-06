@@ -1,17 +1,6 @@
 #include "../../include/minishell.h"
 
-t_command   *new_command(void)
-{
-    t_command   *cmd;
-
-    cmd = malloc(sizeof(t_command));
-    if (!cmd)
-        return(NULL);
-    ft_memset(cmd, 0, sizeof(t_command));
-    return (cmd);
-}
-
-void    add_redirection(t_command *cmd, int type, char *filename)
+static void    add_redirection(t_command *cmd, int type, char *filename)
 {
     t_redirection   *redirection;
     t_redirection   *temp;
@@ -33,9 +22,9 @@ void    add_redirection(t_command *cmd, int type, char *filename)
     }
 }
 
-char    **list_to_argv (t_list *args)
+static char    **list_to_argv (t_list *args)
 {
-    char    **argv:
+    char    **argv;
     int     count;
     int     i;
     t_list  *temp;
@@ -52,4 +41,92 @@ char    **list_to_argv (t_list *args)
         return (NULL);
     i = 0;
     temp = args;
+    while (temp)
+    {
+        argv[i] = temp->content;
+        temp = temp->next;
+        i++;
+    }
+    argv[i] = NULL;
+    return (argv);
+}
+
+static void finalize_command (t_command **head, t_command **current, t_list **args)
+{
+    (*current)->argv = list_to_argv(*args);
+    *args = NULL;
+    if (!*head)
+        *head = *current;
+    else
+        last_command(*head)->next = *current;
+    *current = NULL;
+}
+
+static int parse_loop(t_command **head, t_command **current, t_list **args,
+    t_token *tok)
+{
+    while (tok)
+    {
+        if (!*current)
+            *current = new_command();
+        if (tok->type == PIPE && (!*current || (*current && !(*current)->argv)))
+        {
+            ft_printf_fd(2, "Syntax error: unexpected token `|'\n");
+            if (*current)
+            {
+                free_commands(*current);
+                *current = NULL;
+            }
+            return (1);
+        }
+        if (tok->type == WORD || tok->type == SINGLE_QUOTE
+            || tok->type == DOUBLE_QUOTE || tok->type == ENV_VAR)
+            ft_lstadd_back(args, ft_lstnew(ft_strdup(tok->value)));
+        else if (tok->type >= REDIRECT_IN && tok->type <= HEREDOC)
+        {
+            if (tok->next)
+            {
+                add_redirection(*current, tok->type, tok->next->value);
+                tok = tok->next;
+            }
+            else
+            {
+                ft_printf_fd(2,
+                    "Syntax error: missing filename after redirection\n");
+                free_commands(*current);
+                *current = NULL;
+                return (1);
+            }
+        }
+        else if (tok->type == PIPE)
+                finalize_command(head, current, args);
+        tok = tok->next;
+    }
+    return (0);
+}
+t_command   *parse_tokens(t_token *tokens)
+{
+    t_command   *head;
+    t_command   *current;
+    t_list      *args;
+
+    head = NULL;
+    current = NULL;
+    args = NULL;
+    if (check_leading_pipe(tokens, head, current))
+        return (NULL);
+
+    if (parse_loop(&head, &current, &args, tokens))
+        return (handle_parse_error(head, current));
+
+    if (check_trailing_pipe(tokens, head, current))
+        return (NULL);
+
+    if (check_commandless_redirection(head, current))
+        return (NULL);
+
+    if (current)
+        finalize_command(&head, &current, &args);
+
+    return (head);
 }

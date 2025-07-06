@@ -58,10 +58,16 @@ t_token		*new_token(t_token_type type, const char *start, size_t len);
 void		add_token(t_token **head, t_token *new);
 size_t		handle_word(const char *input, t_token **tokens, size_t i);
 char		*extract_quoted_token(const char *line, size_t *index);
-void		print_tokens(t_token *list);
 
 // --- Parser ---
-t_command	*parse_tokens(t_token *tokens);
+t_command   *parse_tokens(t_token *tokens);
+t_command   *new_command(void);
+t_command   *last_command(t_command *head);
+int         last_token_is_pipe(t_token *tok);
+int	check_leading_pipe(t_token *tokens, t_command *head, t_command *current);
+int	check_trailing_pipe(t_token *tokens, t_command *head, t_command *current);
+int	check_commandless_redirection(t_command *head, t_command *current);
+t_command *handle_parse_error(t_command *head, t_command *current);
 
 // --- Command Execution ---
 int			execute_command(char **argv, t_bash *bash);
@@ -78,5 +84,10 @@ char		*ft_getenv(char **envp, char *key);
 // --- Utilities ---
 void	    free_2d_array(char **arr);
 void	    free_tokens(t_token *tokens);
+void        free_commands(t_command *cmd);
+
+// --- Tests ---
+void		print_tokens(t_token *list);
+void		print_commands(t_command *cmd);
 
 #endif /* MINISHELL_H */

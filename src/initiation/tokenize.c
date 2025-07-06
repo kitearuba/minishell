@@ -14,29 +14,6 @@
 
 /* ************************************************************************** */
 /*                                                                            */
-/*                               print_tokens                                 */
-/* ************************************************************************** */
-/*                                                                            */
-/*  Description:                                                              */
-/*  - Prints the token list to stdout in a formatted way for debugging,       */
-/*    showing each token's type and value.                                    */
-/*                                                                            */
-/*  Parameters:                                                               */
-/*  - list: pointer to the first token in the linked list.                    */
-/*                                                                            */
-/* ************************************************************************** */
-void print_tokens(t_token *list)
-{
-    while (list)
-    {
-        printf("[%d: \"%s\"] -> ", list->type, list->value);
-        list = list->next;
-    }
-    printf("NULL\n");
-}
-
-/* ************************************************************************** */
-/*                                                                            */
 /*                               handle_pipe                                  */
 /* ************************************************************************** */
 /*                                                                            */

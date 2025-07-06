@@ -45,7 +45,7 @@ typedef struct s_redirection
 {
     int					type;
     char				*filename;
-    struct s_redir		*next;
+    struct s_redirection		*next;
 }   t_redirection;
 
 typedef struct s_command
