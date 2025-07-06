@@ -27,7 +27,9 @@
 /*  - Uses run_builtin() for built-ins or exec_external() for other commands. */
 /*                                                                            */
 /* ************************************************************************** */
-int	execute_command(t_command *cmds, t_bash *bash)
+int execute_command(t_command *cmds, t_bash *bash)
 {
-
+    (void)cmds;
+    (void)bash;
+    return (0);
 }

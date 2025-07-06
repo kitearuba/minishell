@@ -70,7 +70,7 @@ int	check_commandless_redirection(t_command *head, t_command *current);
 t_command *handle_parse_error(t_command *head, t_command *current);
 
 // --- Command Execution ---
-int			execute_command(char **argv, t_bash *bash);
+int         execute_command(t_command *cmds, t_bash *bash);
 int			exec_external(char **args, t_bash *bash);
 int			is_builtin(const char *cmd);
 int			run_builtin(char **argv, t_bash *bash);
