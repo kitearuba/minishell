@@ -20,7 +20,7 @@ It is **not a reference implementation** and will be cleaned or made private onc
 
 - [⚙️ Project Overview](#️-project-overview)
 - [🧭 Project Architecture & Flow (for Collaborators)](#-project-architecture--flow-for-collaborators)
-- [📅 Development Status *(Last Updated: June 2025)*](#-development-status-last-updated-june-2025)
+- [📅 Development Status *(Last Updated: July 2025)*](#-development-status-last-updated-july-2025)
 - [🔜 Upcoming Tasks](#-upcoming-tasks)
 - [👥 Contributors](#-contributors)
 - [📁 Repository Structure](#-repository-structure)
@@ -62,6 +62,8 @@ This section explains how the Minishell is structured and how the components int
 ```c
 line = readline("minishell $> ");
 tokens = tokenize_input(line);
+tokens = expand_env_vars(tokens, bash);
+cmds = parse_tokens(tokens);
 ````
 
 ---
@@ -72,16 +74,33 @@ tokens = tokenize_input(line);
 * Splits the user input into tokens (words, pipes, etc.)
 * Outputs a `t_token *` linked list
 
+Supports token types:
+
+* `WORD`, `PIPE`, `REDIRECT`, `SINGLE_QUOTE`, `DOUBLE_QUOTE`, `ENV_VAR`
+
 Example:
 
 ```
-echo hello | grep world
-→ [WORD: "echo"] → [WORD: "hello"] → [PIPE: "|"] → [WORD: "grep"] → [WORD: "world"]
+echo $USER | grep world
+→ [WORD: "echo"] → [ENV_VAR: "$USER"] → [PIPE: "|"] → [WORD: "grep"] → [WORD: "world"]
 ```
 
 ---
 
-### 🔹 3. `parse_tokens()` — Parser
+### 🔹 3. `expand_env_vars()` — Environment Expansion
+
+* File: `src/env/expand.c`
+
+* Replaces tokens of type `ENV_VAR` with `WORD` after expanding:
+
+  * `$VAR` → value from `bash->env`
+  * `$?`   → value of `bash->exit_status`
+
+* Called after tokenization and before parsing.
+
+---
+
+### 🔹 4. `parse_tokens()` — Parser
 
 * File: `src/initiation/parser.c`
 * Builds `t_command` linked list from tokens
@@ -96,7 +115,7 @@ t_command:
 
 ---
 
-### 🔹 4. `execute_command()` — Command Dispatcher
+### 🔹 5. `execute_command()` — Command Dispatcher
 
 * File: `src/cmd/execute_commands.c`
 * Routes commands to:
@@ -106,7 +125,7 @@ t_command:
 
 ---
 
-### 🔹 5. Shell State (`t_bash`)
+### 🔹 6. Shell State (`t_bash`)
 
 * Central struct passed to all modules
 * Stores:
@@ -116,7 +135,7 @@ t_command:
 
 ---
 
-### 🔹 6. Utilities
+### 🔹 7. Utilities
 
 * Located in `src/utils`
 * `free_tokens()` and `free_2d_array()` for memory management
@@ -124,28 +143,24 @@ t_command:
 
 ---
 
-## 📅 Development Status *(Last Updated: June 2025)*
+## 📅 Development Status *(Last Updated: July 2025)*
 
 ### ✅ Completed
 
 * [x] Makefile and main shell structure
 * [x] Custom shell state with `t_bash`
-* [x] Tokenizer for basic commands + pipes
-* [x] Command parser (`t_token → t_command`)
+* [x] Tokenizer for basic commands + pipes + quotes
+* [x] Parser (`t_token → t_command`)
 * [x] Built-in dispatcher: `is_builtin`, `run_builtin`
 * [x] Custom environment manager (`ft_getenv`)
+* [x] Environment variable expansion: `$VAR`, `$?`
 * [x] Debug utilities: `print_tokens()`
-* [x] Memory cleanup: `free_tokens()`
+* [x] Memory cleanup: `free_tokens()`, `free_commands()`
 
 ### 🛠️ In Progress
 
-* [ ] Full parser integration with redirections
+* [ ] Final integration of redirection logic (`<`, `>`, `>>`, `<<`)
 * [ ] Executor that handles pipes (`|`)
-* [ ] Expand tokenizer to support:
-
-  * Quotes: `'`, `"`
-  * Redirections: `>`, `>>`, `<`, `<<`
-  * Environment variables: `$VAR`, `$?`
 * [ ] Signal handling (Ctrl-C, Ctrl-D)
 * [ ] Redirection output logic (via `dup2` and file descriptors)
 
@@ -153,18 +168,18 @@ t_command:
 
 ## 🔜 Upcoming Tasks
 
-* Implement `free_commands()` to avoid leaks after parsing
-* Add heredoc (`<<`) parsing
-* Handle escaped characters
-* Improve error messaging and Bash-like feedback
-* Final cleanup for Deepthought and 42 Norm compliance
+* Finalize heredoc (`<<`) parsing
+* Handle escaped characters in quotes
+* Improve syntax validation and Bash-like error feedback
+* Norm check: Ensure all `.c` files meet 42 formatting and line limits
+* Add more execution test cases and error behaviors
 
 ---
 
 ## 👥 Contributors
 
-* **chrrodri** — Original author, project structure & lexer/parser logic
-* **bsamy** — Partner from June 2025 onward, contributing to parsing, redirection, and exec logic
+* **chrrodri** — Project structure & lexer/parser logic
+* **bsamy** — Partner from June 2025 onward, contributing to lexer, parser, env expansion, and redirection logic
 
 Both students at **42 School Barcelona**
 
@@ -182,7 +197,7 @@ Both students at **42 School Barcelona**
 ├── src/
 │   ├── builtin/
 │   ├── cmd/
-│   ├── env/
+│   ├── env/                   ← 🌱 NEW: contains `expand_env_vars.c`
 │   ├── executor/
 │   ├── initiation/
 │   └── utils/
@@ -193,28 +208,24 @@ Both students at **42 School Barcelona**
 
 ---
 
-## 📌 Quickstart for Bsamy
+## 📌 Quickstart
 
-> 🆕 Partner onboarding guide
+> 🆕 Current onboarding guide
 
 1. **Run it:**
    `make && ./minishell`
 
 2. **Try commands:**
    `echo hello | grep h`
+   `echo $USER > out.txt`
 
 3. **Read in this order:**
 
    * `minishell.c`
    * `tokenize.c` (`tokenize_input`, `print_tokens`)
+   * `expand_env_vars.c`
    * `parser.c` (`parse_tokens`, `t_command`)
    * `execute_commands.c`
-
-4. Ping `chrrodri` for:
-
-   * Task division
-   * File ownership
-   * Help understanding environment/exec parts
 
 ---
 
@@ -223,8 +234,4 @@ Both students at **42 School Barcelona**
 This project is for educational purposes as part of the 42 curriculum.
 It does not aim to replace production shells and should not be copied without understanding its internal design and learning goals.
 
----
-
-📌 *Last updated: June 2025*
-
-```
+📌 *Last updated: July 7, 2025*
