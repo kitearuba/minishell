@@ -38,6 +38,7 @@ SRC = 	minishell.c \
 		$(SRC_DIR)/initiation/parse_tokens.c \
 		$(SRC_DIR)/initiation/parse_utils.c \
 		$(SRC_DIR)/initiation/parser_checks.c \
+		$(SRC_DIR)/expand/expand.c \
 		$(SRC_DIR)/env/ft_getenv.c \
 		$(SRC_DIR)/utils/free_2d_array.c \
 		$(SRC_DIR)/utils/free_tokens.c \

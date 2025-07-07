@@ -59,6 +59,9 @@ void		add_token(t_token **head, t_token *new);
 size_t		handle_word(const char *input, t_token **tokens, size_t i);
 char		*extract_quoted_token(const char *line, size_t *index);
 
+// --- Expand Variable ---
+void	expand_env_vars(t_token *tokens, t_bash *bash);
+
 // --- Parser ---
 t_command   *parse_tokens(t_token *tokens);
 t_command   *new_command(void);
