@@ -54,7 +54,7 @@ static size_t  handle_pipe(const char *input, t_token **tokens, size_t i)
 /*  - The updated index after processing the redirection.                     */
 /*                                                                            */
 /* ************************************************************************** */
-static size_t  handle_redirection(const char *input, t_token **tokens, size_t i)
+static size_t  handle_tok_redirect(const char *input, t_token **tokens, size_t i)
 {
     if (input[i] == '>' && input [i + 1] == '>')
     {
@@ -200,7 +200,7 @@ t_token	*tokenize_input(const char *input)
         else if (input[i] == '|')
             i = handle_pipe(input, &tokens, i);
         else if (input[i] == '>' || input[i] == '<')
-            i = handle_redirection(input, &tokens, i);
+            i = handle_tok_redirect(input, &tokens, i);
         else if (input[i] == '\'' || input[i] == '"')
         {
             if (!handle_quotes(input, &tokens, &i))

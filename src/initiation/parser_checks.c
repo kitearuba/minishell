@@ -1,6 +1,14 @@
-//
-// Created by christian on 6/07/25.
-//
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   parse_checks.c                                     :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: chrrodri <chrrodri@student.42barcelona.co  +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2025/07/01 14:15:32 by chrrodri          #+#    #+#             */
+/*   Updated: 2025/07/07 16:43:48 by chrrodri         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
 
 #include "../../include/minishell.h"
 
@@ -38,32 +46,53 @@ int	check_trailing_pipe(t_token *tokens, t_command *head, t_command *current)
     return (0);
 }
 
-/**
- * Check if there's a command with only redirections and no argv.
- */
-int	check_commandless_redirection(t_command *head, t_command *current)
+int	check_commandless_redirection(t_command *head)
 {
-    if (current && !current->argv)
+    t_command	*cmd;
+
+    cmd = head;
+    while (cmd)
     {
-        ft_printf_fd(2, "Syntax error: unexpected redirection with no command\n");
-        if (head)
+        if (!cmd->argv && cmd->redirection)
+        {
+            ft_printf_fd(2, "Syntax error: unexpected redirection with no command\n");
             free_commands(head);
-        if (current)
-            free_commands(current);
+            return (1);
+        }
+        cmd = cmd->next;
+    }
+    return (0);
+}
+
+int	check_initial_errors(t_token *tok)
+{
+    if (!tok)
+        return (0);
+    if (tok->type == PIPE)
+    {
+        ft_printf_fd(2, "Syntax error: unexpected token `|'\n");
+        return (1);
+    }
+    if (tok->type >= REDIRECT_IN && tok->type <= HEREDOC)
+    {
+        ft_printf_fd(2,
+            "Syntax error: unexpected redirection with no command\n");
         return (1);
     }
     return (0);
 }
 
-/**
- * Handle general parse loop errors.
- * Frees resources and returns NULL.
- */
-t_command *handle_parse_error(t_command *head, t_command *current)
+int	check_consecutive_pipes(t_token *tok, t_command **current)
 {
-    if (head)
-        free_commands(head);
-    if (current)
-        free_commands(current);
-    return (NULL);
+    if (tok->type == PIPE && tok->next
+        && (tok->next->type == PIPE
+            || (tok->next->type >= REDIRECT_IN
+                && tok->next->type <= HEREDOC)))
+    {
+        ft_printf_fd(2, "Syntax error: unexpected token `|'\n");
+        free_commands(*current);
+        *current = NULL;
+        return (1);
+    }
+    return (0);
 }

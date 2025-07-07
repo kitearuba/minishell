@@ -63,13 +63,15 @@ char		*extract_quoted_token(const char *line, size_t *index);
 t_command   *parse_tokens(t_token *tokens);
 t_command   *new_command(void);
 t_command   *last_command(t_command *head);
-int         last_token_is_pipe(t_token *tok);
+int	last_token_is_pipe(t_token *tok);
 int	check_leading_pipe(t_token *tokens, t_command *head, t_command *current);
 int	check_trailing_pipe(t_token *tokens, t_command *head, t_command *current);
-int	check_commandless_redirection(t_command *head, t_command *current);
 int	check_consecutive_pipes(t_token *tok, t_command **current);
 int	check_initial_errors(t_token *tok);
 t_command *handle_parse_error(t_command *head, t_command *current);
+int	check_commandless_redirection(t_command *head);
+int	handle_parse_redirection(t_token *tok, t_command **current);
+void	add_redirection(t_command *cmd, int type, char *filename);
 
 // --- Command Execution ---
 int         execute_command(t_command *cmds, t_bash *bash);

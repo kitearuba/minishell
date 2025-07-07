@@ -1,6 +1,15 @@
-//
-// Created by christian on 2/07/25.
-//
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   parse_utils.c                                      :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: chrrodri <chrrodri@student.42barcelona.co  +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2025/06/29 14:15:32 by chrrodri          #+#    #+#             */
+/*   Updated: 2025/07/07 17:43:48 by chrrodri         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "../../include/minishell.h"
 
 t_command   *new_command(void)
@@ -21,46 +30,46 @@ t_command    *last_command(t_command *head)
     return (head);
 }
 
-int	last_token_is_pipe(t_token *tok)
+void	add_redirection(t_command *cmd, int type, char *filename)
 {
-    if (!tok)
-        return (0);
-    while (tok->next)
-        tok = tok->next;
-    return (tok->type == PIPE);
+    t_redirection	*redirection;
+    t_redirection	*temp;
+
+    redirection = malloc(sizeof(t_redirection));
+    if (!redirection)
+        return ;
+    ft_memset(redirection, 0, sizeof(t_redirection));
+    redirection->type = type;
+    redirection->filename = ft_strdup(filename);
+    if (!cmd->redirection)
+        cmd->redirection = redirection;
+    else
+    {
+        temp = cmd->redirection;
+        while (temp->next)
+            temp = temp->next;
+        temp->next = redirection;
+    }
 }
 
-#include "../../include/minishell.h"
-
-int	check_initial_errors(t_token *tok)
+t_command	*handle_parse_error(t_command *head, t_command *current)
 {
-    if (!tok)
-        return (0);
-    if (tok->type == PIPE)
-    {
-        ft_printf_fd(2, "Syntax error: unexpected token `|'\n");
-        return (1);
-    }
-    if (tok->type >= REDIRECT_IN && tok->type <= HEREDOC)
-    {
-        ft_printf_fd(2,
-            "Syntax error: unexpected redirection with no command\n");
-        return (1);
-    }
-    return (0);
+    if (head)
+        free_commands(head);
+    if (current)
+        free_commands(current);
+    return (NULL);
 }
 
-int	check_consecutive_pipes(t_token *tok, t_command **current)
+int	handle_parse_redirection(t_token *tok, t_command **current)
 {
-    if (tok->type == PIPE && tok->next
-        && (tok->next->type == PIPE
-            || (tok->next->type >= REDIRECT_IN
-                && tok->next->type <= HEREDOC)))
+    if (tok->next)
     {
-        ft_printf_fd(2, "Syntax error: unexpected token `|'\n");
-        free_commands(*current);
-        *current = NULL;
-        return (1);
+        add_redirection(*current, tok->type, tok->next->value);
+        return (0);
     }
-    return (0);
+    ft_printf_fd(2, "Syntax error: missing filename after redirection\n");
+    free_commands(*current);
+    *current = NULL;
+    return (1);
 }
