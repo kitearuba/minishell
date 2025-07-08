@@ -172,6 +172,7 @@ int	main(int ac, char *argv[], char *envp[])
             tokens = tokenize_input(line);
             if (tokens)
             {
+                expand_env_vars(tokens, &bash);
                 cmds = parse_tokens(tokens);
                 print_tokens(tokens);
                 if (cmds)
