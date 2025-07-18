@@ -55,6 +55,7 @@ SRCS = $(SRCS_DIR)/ft_isalpha.c $(SRCS_DIR)/ft_isdigit.c \
        $(SRCS_DIR)/get_next_line_bonus.c $(SRCS_DIR)/ft_strappend.c \
        $(SRCS_DIR)/ft_printf_fd.c $(SRCS_DIR)/ft_strcmp.c \
        $(SRCS_DIR)/ft_atoi_base.c $(SRCS_DIR)/ft_strtol.c \
+       $(SRCS_DIR)/ft_atoll.c \
 
 # Object files
 OBJS = $(SRCS:.c=.o)

@@ -27,9 +27,22 @@
 /*  - Uses run_builtin() for built-ins or exec_external() for other commands. */
 /*                                                                            */
 /* ************************************************************************** */
-int execute_command(t_command *cmds, t_bash *bash)
+int	execute_command(t_command *cmds, t_bash *bash)
 {
-    (void)cmds;
-    (void)bash;
-    return (0);
+    int	status;
+
+    while (cmds)
+    {
+        if (!cmds->argv || !cmds->argv[0])
+        {
+            cmds = cmds->next;
+            continue ;
+        }
+        if (is_builtin(cmds->argv[0]))
+            status = run_builtin(cmds->argv, bash);
+        else
+            status = run_external_cmd(cmds, bash);
+        cmds = cmds->next;
+    }
+    return (status);
 }

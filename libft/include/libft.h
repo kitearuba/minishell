@@ -21,6 +21,8 @@
 # include <stdlib.h>    /* For malloc(), free(), exit() */
 # include <unistd.h>    /* For write(), read(), close() */
 # include <stdarg.h>    /* For variadic functions */
+# include <limits.h>    /* For variadic functions */
+
 
 /* ************************************************************************** */
 /*                                Macros                                      */
@@ -73,6 +75,7 @@ int		ft_atoi(const char *str);
 void	*ft_calloc(size_t count, size_t size);
 int		ft_atoi_base(const char *str, int base);
 long	ft_strtol(const char *str, char **endptr, int base);
+long long	ft_atoll(const char *str);
 
 /* --------------------------- Additional Functions ------------------------- */
 
