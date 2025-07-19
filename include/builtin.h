@@ -19,9 +19,10 @@ int		ft_echo(char **argv, t_bash *bash);
 int		ft_cd(char **argv, t_bash *bash);
 int		ft_pwd(char **argv, t_bash *bash);
 int		ft_export(char **argv, t_bash *bash);
+int    append_env_var(char ***env, const char *new_var);
 int		ft_unset(char **argv, t_bash *bash);
 int		ft_env(char **argv, t_bash *bash);
-int		ft_exit(char **argv, t_bash *bash);
+void	ft_exit(char **argv, t_bash *bash);
 int		is_valid_identifier(const char *str);
 char	**copy_env(char **env);
 

@@ -6,7 +6,7 @@
 /*   By: chrrodri <chrrodri@student.42barcelona.co  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/20 16:21:19 by chrrodri          #+#    #+#             */
-/*   Updated: 2025/07/18 19:30:00 by chrrodri         ###   ########.fr       */
+/*   Updated: 2025/07/19 00:05:00 by chrrodri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -38,17 +38,11 @@ typedef enum e_builtin_type
     BUILTIN_UNSET
 }	t_builtin_type;
 
-typedef struct s_bash
-{
-    char	**env;
-    int		exit_status;
-}	t_bash;
-
 typedef struct s_token
 {
-    t_token_type		type;
-    char				*value;
-    struct s_token		*next;
+    t_token_type	type;
+    char			*value;
+    struct s_token	*next;
 }	t_token;
 
 typedef struct s_redirection
@@ -64,5 +58,13 @@ typedef struct s_command
     t_redirection		*redirection;
     struct s_command	*next;
 }	t_command;
+
+typedef struct s_bash
+{
+    char		**env;
+    int			exit_status;
+    t_token		*tokens;
+    t_command	*commands;
+}	t_bash;
 
 #endif /* STRUCT_H */

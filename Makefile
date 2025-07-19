@@ -45,14 +45,16 @@ SRC = 	minishell.c \
 		$(SRC_DIR)/utils/free_2d_array.c \
 		$(SRC_DIR)/utils/free_tokens.c \
 		$(SRC_DIR)/utils/free_commands.c \
-		$(SRC_DIR)/cmd/run_external_cmd.c \
+		$(SRC_DIR)/utils/free_all_and_exit.c \
 		$(SRC_DIR)/cmd/built_in.c \
 		$(SRC_DIR)/cmd/execute_commands.c \
 		$(SRC_DIR)/executor/get_cmd_path.c \
+		$(SRC_DIR)/executor/run_external_cmd.c \
         $(SRC_DIR)/builtin/ft_echo.c \
         $(SRC_DIR)/builtin/ft_cd.c \
         $(SRC_DIR)/builtin/ft_pwd.c \
         $(SRC_DIR)/builtin/ft_export.c \
+        $(SRC_DIR)/builtin/ft_export_utils.c \
         $(SRC_DIR)/builtin/ft_unset.c \
         $(SRC_DIR)/builtin/ft_env.c \
         $(SRC_DIR)/builtin/ft_exit.c \

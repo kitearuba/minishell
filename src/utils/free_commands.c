@@ -1,38 +1,51 @@
-//
-// Created by christian on 5/07/25.
-//
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   free_commands.c                                    :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: chrrodri <chrrodri@student.42barcelona.co  +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2025/05/18 23:25:00 by chrrodri          #+#    #+#             */
+/*   Updated: 2025/07/19 00:20:00 by chrrodri         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
 
 #include "../../include/minishell.h"
 
-void    free_commands(t_command *cmd)
+static void	free_argv(char **argv)
 {
-    t_command       *next_cmd;
-    t_redirection   *redirection;
-    t_redirection   *next_redirection;
-    int             i;
+	int	i;
 
-    while (cmd)
-    {
-        next_cmd = cmd->next;
-        if (cmd->argv)
-        {
-            i = 0;
-            while (cmd->argv[i])
-            {
-                free(cmd->argv[i]);
-                i++;
-            }
-            free(cmd->argv);
-        }
-        redirection = cmd->redirection;
-        while (redirection)
-        {
-            next_redirection = redirection->next;
-            free(redirection->filename);
-            free(redirection);
-            redirection = next_redirection;
-        }
-        free(cmd);
-        cmd = next_cmd;
-    }
+	i = 0;
+	while (argv[i])
+		free(argv[i++]);
+	free(argv);
+}
+
+static void	free_redirections(t_redirection *redir)
+{
+	t_redirection	*next;
+
+	while (redir)
+	{
+		next = redir->next;
+		free(redir->filename);
+		free(redir);
+		redir = next;
+	}
+}
+
+void	free_commands(t_command *cmd)
+{
+	t_command	*next;
+
+	while (cmd)
+	{
+		next = cmd->next;
+		if (cmd->argv)
+			free_argv(cmd->argv);
+		free_redirections(cmd->redirection);
+		free(cmd);
+		cmd = next;
+	}
 }

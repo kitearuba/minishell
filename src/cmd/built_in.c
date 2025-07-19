@@ -27,7 +27,7 @@ int run_builtin(char **argv, t_bash *bash)
     else if (ft_strcmp(argv[0], "env") == 0)
         return (ft_env(argv, bash));
     else if (ft_strcmp(argv[0], "exit") == 0)
-        return (ft_exit(argv, bash));
+        ft_exit(argv, bash);
     return (1);
 }
 

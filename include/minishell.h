@@ -83,6 +83,7 @@ char		*ft_getenv(char **envp, char *key);
 void		free_2d_array(char **arr);
 void		free_tokens(t_token *tokens);
 void		free_commands(t_command *cmd);
+void        free_all_and_exit(t_bash *bash, int exit_code);
 
 /* --- Debug / Testing --- */
 void		print_tokens(t_token *list);

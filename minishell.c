@@ -47,6 +47,8 @@ static int	init_minishell(t_bash *bash, char **envp)
 	if (!bash->env)
 		return (1);
 	bash->exit_status = 0;
+    bash->tokens = NULL;
+    bash->commands = NULL;
 	return (0);
 }
 
@@ -59,24 +61,37 @@ static int	exit_failure(t_bash *bash)
 
 static void	process_input(char *line, t_bash *bash)
 {
-	t_token		*tokens;
-	t_command	*cmds;
-
-	tokens = tokenize_input(line);
-	if (!tokens)
-		return ;
-	expand_env_vars(tokens, bash);
-	cmds = parse_tokens(tokens);
-	if (cmds && is_builtin(cmds->argv[0]))
-	{
-		bash->exit_status = run_builtin(cmds->argv, bash);
-		free_commands(cmds);
-	}
-	else if (cmds)
-		run_external_cmd(cmds, bash);
-	else
-		ft_printf_fd(2, "Parse error: no commands generated\n");
-	free_tokens(tokens);
+    if (bash->tokens)
+    {
+        free_tokens(bash->tokens);
+        bash->tokens = NULL;
+    }
+    if (bash->commands)
+    {
+        free_commands(bash->commands);
+        bash->commands = NULL;
+    }
+    bash->tokens = tokenize_input(line);
+    if (!bash->tokens)
+        return ;
+    expand_env_vars(bash->tokens, bash);
+    bash->commands = parse_tokens(bash->tokens);
+    if (bash->commands && is_builtin(bash->commands->argv[0]))
+    {
+        bash->exit_status = run_builtin(bash->commands->argv, bash);
+        free_commands(bash->commands);
+        bash->commands = NULL;
+    }
+    else if (bash->commands)
+    {
+        run_external_cmd(bash->commands, bash);
+    }
+    else
+    {
+        ft_printf_fd(2, "Parse error: no commands generated\n");
+    }
+    free_tokens(bash->tokens);
+    bash->tokens = NULL;
 }
 
 int	main(int ac, char **av, char **envp)
@@ -103,6 +118,6 @@ int	main(int ac, char **av, char **envp)
 		free(line);
 	}
 	clear_history();
-	free_2d_array(bash.env);
+    free_all_and_exit(&bash, 0);
 	return (0);
 }
