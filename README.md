@@ -20,7 +20,7 @@ It is **not a reference implementation** and will be cleaned or made private onc
 
 - [⚙️ Project Overview](#️-project-overview)
 - [🧭 Project Architecture & Flow (for Collaborators)](#-project-architecture--flow-for-collaborators)
-- [📅 Development Status *(Last Updated: July 2025)*](#-development-status-last-updated-july-2025)
+- [🗕️ Development Status *(Last Updated: July 2025)*](#-development-status-last-updated-july-2025)
 - [🔜 Upcoming Tasks](#-upcoming-tasks)
 - [👥 Contributors](#-contributors)
 - [📁 Repository Structure](#-repository-structure)
@@ -102,7 +102,7 @@ echo $USER | grep world
 
 ### 🔹 4. `parse_tokens()` — Parser
 
-* File: `src/initiation/parser.c`
+* File: `src/initiation/parse_tokens.c`
 * Builds `t_command` linked list from tokens
 * Supports command pipelining via `next`
 
@@ -122,6 +122,7 @@ t_command:
 
   * Built-ins: `cd`, `exit`, etc.
   * External: calls `execve()` via `run_external_cmd.c`
+  * Pipe chains: calls `execute_pipeline()` from `src/executor/pipes/`
 
 ---
 
@@ -132,6 +133,17 @@ t_command:
 
   * `char **env` (custom environment)
   * `int exit_status` (last command result)
+  * `t_token *tokens` (raw token list)
+  * `t_command *commands` (parsed commands)
+
+```c
+typedef struct s_bash {
+    char        **env;
+    int         exit_status;
+    t_token     *tokens;
+    t_command   *commands;
+} t_bash;
+```
 
 ---
 
@@ -140,10 +152,15 @@ t_command:
 * Located in `src/utils`
 * `free_tokens()` and `free_2d_array()` for memory management
 * `ft_getenv()` replaces `getenv()` for controlled env access
+* `free_all_and_exit()` ensures leak-free program termination
+
+```c
+void free_all_and_exit(t_bash *bash, int exit_code);
+```
 
 ---
 
-## 📅 Development Status *(Last Updated: July 2025)*
+## 🗕️ Development Status *(Last Updated: July 19, 2025)*
 
 ### ✅ Completed
 
@@ -155,14 +172,15 @@ t_command:
 * [x] Custom environment manager (`ft_getenv`)
 * [x] Environment variable expansion: `$VAR`, `$?`
 * [x] Debug utilities: `print_tokens()`
-* [x] Memory cleanup: `free_tokens()`, `free_commands()`
+* [x] Memory cleanup: `free_tokens()`, `free_commands()`, `free_all_and_exit()`
+* [x] Modular built-in + external command executor
+* [x] Pipeline executor `execute_pipeline()` using `t_command->next`
 
 ### 🛠️ In Progress
 
 * [ ] Final integration of redirection logic (`<`, `>`, `>>`, `<<`)
-* [ ] Executor that handles pipes (`|`)
 * [ ] Signal handling (Ctrl-C, Ctrl-D)
-* [ ] Redirection output logic (via `dup2` and file descriptors)
+* [ ] Norm fixes and modularization of executor
 
 ---
 
@@ -179,7 +197,7 @@ t_command:
 ## 👥 Contributors
 
 * **chrrodri** — Project structure & lexer/parser logic
-* **bsamy** — Partner from June 2025 onward, contributing to lexer, parser, env expansion, and redirection logic
+* **bsamy** — Partner from June 2025 onward, contributing to lexer, parser, env expansion, and execution logic (pipes, builtins)
 
 Both students at **42 School Barcelona**
 
@@ -192,15 +210,16 @@ Both students at **42 School Barcelona**
 ├── include/
 │   ├── minishell.h
 │   ├── builtin.h
-│   └── struct.h
+│   └── struct.h               ← updated: includes redirections, tokens, bash
 ├── libft/
 ├── src/
 │   ├── builtin/
 │   ├── cmd/
 │   ├── env/                   ← 🌱 NEW: contains `expand_env_vars.c`
 │   ├── executor/
+│   │   └── pipes/             ← 🧩 NEW: contains `execute_pipeline.c`, `exec_single_cmd.c`
 │   ├── initiation/
-│   └── utils/
+│   └── utils/                 ← includes `free_all_and_exit.c`
 ├── minishell.c
 ├── Makefile
 └── README.md
@@ -210,7 +229,7 @@ Both students at **42 School Barcelona**
 
 ## 📌 Quickstart
 
-> 🆕 Current onboarding guide
+> 🌚 Current onboarding guide
 
 1. **Run it:**
    `make && ./minishell`
@@ -224,8 +243,10 @@ Both students at **42 School Barcelona**
    * `minishell.c`
    * `tokenize.c` (`tokenize_input`, `print_tokens`)
    * `expand_env_vars.c`
-   * `parser.c` (`parse_tokens`, `t_command`)
+   * `parse_tokens.c` (`parse_tokens`, `t_command`)
    * `execute_commands.c`
+   * `executor/pipes/execute_pipeline.c`
+   * `utils/free_all_and_exit.c`
 
 ---
 
@@ -234,4 +255,4 @@ Both students at **42 School Barcelona**
 This project is for educational purposes as part of the 42 curriculum.
 It does not aim to replace production shells and should not be copied without understanding its internal design and learning goals.
 
-📌 *Last updated: July 7, 2025*
+📌 *Last updated: July 19, 2025*
