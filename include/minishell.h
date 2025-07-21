@@ -22,6 +22,7 @@
 # include <sys/stat.h>
 # include <sys/types.h>
 # include <sys/wait.h>
+# include <signal.h>
 
 /* --- Readline Libraries --- */
 # include <readline/readline.h>
@@ -35,6 +36,9 @@
 /* ============================== MACROS ================================= */
 
 # define BUILTIN_CMDS ":echo:cd:pwd:export:unset:env:exit"
+
+extern volatile sig_atomic_t g_heredoc_interrupted;
+
 
 /* ======================== FUNCTION PROTOTYPES ========================== */
 
@@ -92,6 +96,10 @@ void        free_all_and_exit(t_bash *bash, int exit_code);
 int         execute_pipeline(t_command *cmds, t_bash *bash);
 void	create_pipe(int *pipefd, t_bash *bash);
 int fork_and_exec(t_command *cmd, int input_fd, int output_fd, t_bash *bash);
+
+/* --- Signal --- */
+void	setup_signal_handlers(void);
+void	setup_child_signals(void);
 
 /* --- Debug / Testing --- */
 void		print_tokens(t_token *list);

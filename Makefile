@@ -49,6 +49,7 @@ SRC = 	minishell.c \
 		$(SRC_DIR)/cmd/built_in.c \
 		$(SRC_DIR)/cmd/execute_commands.c \
 		$(SRC_DIR)/executor/get_cmd_path.c \
+		$(SRC_DIR)/executor/execve.c \
 		$(SRC_DIR)/executor/run_external_cmd.c \
 		$(SRC_DIR)/executor/redirection.c \
 		$(SRC_DIR)/executor/heredoc.c \
@@ -63,6 +64,7 @@ SRC = 	minishell.c \
         $(SRC_DIR)/builtin/ft_env.c \
         $(SRC_DIR)/builtin/ft_exit.c \
         $(SRC_DIR)/builtin/builtin_utils.c \
+        $(SRC_DIR)/signal/signal.c \
         $(SRC_DIR)/tests/print.c
 
 

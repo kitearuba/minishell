@@ -113,6 +113,7 @@ int	main(int ac, char **av, char **envp)
 		return (exit_failure(&bash));
     int saved_stdin = dup(STDIN_FILENO);
     int saved_stdout = dup(STDOUT_FILENO);
+    setup_signal_handlers();
 	while (1)
 	{
 	    dup2(saved_stdin, STDIN_FILENO);
