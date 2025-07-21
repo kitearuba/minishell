@@ -1,73 +1,79 @@
-//
-// Created by christian on 19/07/25.
-//
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   execute_pipeline.c                                 :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: chrrodri <chrrodri@student.42barcelona.co  +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2025/07/20 14:00:00 by chrrodri          #+#    #+#             */
+/*   Updated: 2025/07/20 14:45:00 by chrrodri         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
 
 #include "../../../include/minishell.h"
 
-void execute_single_command(t_command *cmd, t_bash *bash)
+void	execve_cmd(char **argv, char **env, t_bash *bash)
 {
-    if (!cmd || !cmd->argv || !cmd->argv[0])
-        exit(1);
-    if (is_builtin(cmd->argv[0]))
-    {
-        exit(run_builtin(cmd, bash));
-    }
-    else
-    {
-        run_external_cmd(cmd, bash);
-    }
+	char	*path;
+
+	path = get_cmd_path(argv[0], env);
+	if (!path)
+	{
+		ft_putstr_fd("minishell: command not found: ", 2);
+		ft_putendl_fd(argv[0], 2);
+		free_all_and_exit(bash, 127);
+	}
+	execve(path, argv, env);
+	perror("execve");
+	free_all_and_exit(bash, 126);
 }
 
-/**
- * Executes a pipeline of commands.
- * Each t_command in the linked list is a stage in the pipeline.
- */
-void execute_pipeline(t_command *cmds, t_bash *bash)
+static void	child_process(t_command *cmd, int input_fd, int output_fd, t_bash *bash)
 {
-    int		pipefd[2];
-    int		input_fd = STDIN_FILENO;
-    pid_t	pid;
-    int		status;
-    t_command *cmd = cmds;
+	if (dup2(input_fd, STDIN_FILENO) == -1 || dup2(output_fd, STDOUT_FILENO) == -1)
+		free_all_and_exit(bash, 1);
+	if (input_fd != STDIN_FILENO)
+		close(input_fd);
+	if (output_fd != STDOUT_FILENO)
+		close(output_fd);
+    if (apply_redirections(cmd->redirection, bash))
+		free_all_and_exit(bash, 1);
+	execve_cmd(cmd->argv, bash->env, bash);
+}
 
-    while (cmd)
-    {
-        if (cmd->next)
-        {
-            if (pipe(pipefd) == -1)
-            {
-                perror("pipe");
-                exit(1);
-            }
-        }
-        pid = fork();
-        if (pid == -1)
-        {
-            perror("fork");
-            exit(1);
-        }
-        if (pid == 0)
-        {
-            if (input_fd != STDIN_FILENO)
-                dup2(input_fd, STDIN_FILENO);
-            if (cmd->next)
-            {
-                close(pipefd[0]);
-                dup2(pipefd[1], STDOUT_FILENO);
-                close(pipefd[1]);
-            }
-            execute_single_command(cmd, bash); // handles execve() or builtin
-            exit(EXIT_FAILURE); // if exec fails
-        }
-        if (input_fd != STDIN_FILENO)
-            close(input_fd);
-        if (cmd->next)
-        {
-            close(pipefd[1]);
-            input_fd = pipefd[0];
-        }
-        cmd = cmd->next;
-    }
-    while (wait(&status) != -1)
-        continue;
+int	execute_pipeline(t_command *cmd, t_bash *bash)
+{
+	int		pipefd[2];
+	int		input_fd = STDIN_FILENO;
+	pid_t	last_pid = -1;
+	pid_t	pid;
+
+	while (cmd->next)
+	{
+		if (pipe(pipefd) == -1)
+			free_all_and_exit(bash, 1);
+		pid = fork();
+		if (pid < 0)
+			free_all_and_exit(bash, 1);
+		else if (pid == 0)
+			child_process(cmd, input_fd, pipefd[1], bash);
+		close(pipefd[1]);
+		if (input_fd != STDIN_FILENO)
+			close(input_fd);
+		input_fd = pipefd[0];
+		cmd = cmd->next;
+	}
+	last_pid = fork();
+	if (last_pid < 0)
+		free_all_and_exit(bash, 1);
+	else if (last_pid == 0)
+		child_process(cmd, input_fd, STDOUT_FILENO, bash);
+	if (input_fd != STDIN_FILENO)
+		close(input_fd);
+	int status;
+	waitpid(last_pid, &status, 0);
+	while (wait(NULL) > 0)
+		;
+	bash->exit_status = WEXITSTATUS(status);
+	return (bash->exit_status);
 }

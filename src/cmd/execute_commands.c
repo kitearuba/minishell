@@ -12,37 +12,22 @@
 
 #include "../../include/minishell.h"
 
-/* ************************************************************************** */
-/*                                                                            */
-/*                           execute_command                                 */
-/* ************************************************************************** */
-/*                                                                            */
-/*  Description:                                                              */
-/*  - Determines if the given command is a built-in and executes it, or       */
-/*    otherwise runs it as an external command.                               */
-/*                                                                            */
-/*                                                                            */
-/*  Notes:                                                                    */
-/*  - Calls is_builtin() to check if the command is a supported built-in.     */
-/*  - Uses run_builtin() for built-ins or exec_external() for other commands. */
-/*                                                                            */
-/* ************************************************************************** */
 int	execute_command(t_command *cmds, t_bash *bash)
 {
-    int	status;
-
-    while (cmds)
+    if (!cmds)
+        return (127);
+    if (cmds->next)
     {
-        if (!cmds->argv || !cmds->argv[0])
-        {
-            cmds = cmds->next;
-            continue ;
-        }
-        if (is_builtin(cmds->argv[0]))
-            status = run_builtin(cmds->argv, bash);
-        else
-            status = run_external_cmd(cmds, bash);
-        cmds = cmds->next;
+        execute_pipeline(cmds, bash);
+        return (bash->exit_status);
     }
-    return (status);
+    if (!cmds->argv || !cmds->argv[0])
+        return (127);
+    if (apply_redirections(cmds->redirection, bash))
+        return (1);
+    if (is_builtin(cmds->argv[0]))
+        bash->exit_status = run_builtin(cmds->argv, bash);
+    else
+        bash->exit_status = exec_external(cmds->argv, bash);
+    return (bash->exit_status);
 }

@@ -10,22 +10,15 @@
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../../include/pipex.h"
-
-/* ************************************************************************** */
-/*                              Pipe Creation                                 */
-/* ************************************************************************** */
+#include "../../../include/minishell.h"
 
 /**
  * create_pipe - Creates a pipe for inter-process communication.
  * @pipefd: Array to store the file descriptors for the pipe ends.
- * @pipex: Pointer to the pipex structure for resource cleanup on error.
- * Description:
- * - Creates a pipe and stores the file descriptors in `pipefd`.
- * - Exits with an error message if the pipe creation fails.
+ * @bash: Pointer to t_bash structure (optional, for exiting cleanly).
  */
-void	create_pipe(int *pipefd, t_pipex *pipex)
+void	create_pipe(int *pipefd, t_bash *bash)
 {
 	if (pipe(pipefd) == -1)
-		free_resources_on_error(pipex, "Error creating pipe", 1);
+		free_all_and_exit(bash, EXIT_FAILURE);
 }

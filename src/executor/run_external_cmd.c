@@ -25,7 +25,6 @@ int	exec_external(char **args, t_bash *bash)
 
 	if (!args || !args[0])
 		return (127);
-
 	cmd_path = get_cmd_path(args[0], bash->env);
 	if (!cmd_path)
 	{
@@ -50,21 +49,4 @@ int	exec_external(char **args, t_bash *bash)
 	bash->exit_status = WEXITSTATUS(status);
 	free(cmd_path);
 	return (bash->exit_status);
-}
-
-/* ************************************************************************** */
-/*                            run_external_cmd                                */
-/* ************************************************************************** */
-/*  Description:                                                              */
-/*  - Main dispatcher: decides if a command is a built-in or external.        */
-/* ************************************************************************** */
-int	run_external_cmd(t_command *cmd, t_bash *bash)
-{
-	if (!cmd || !cmd->argv || !cmd->argv[0])
-		return (0);
-
-	if (is_builtin(cmd->argv[0]))
-		return (run_builtin(cmd->argv, bash));
-	else
-		return (exec_external(cmd->argv, bash));
 }

@@ -76,6 +76,7 @@ static void	process_input(char *line, t_bash *bash)
         return ;
     expand_env_vars(bash->tokens, bash);
     bash->commands = parse_tokens(bash->tokens);
+    /*
     if (bash->commands && is_builtin(bash->commands->argv[0]))
     {
         bash->exit_status = run_builtin(bash->commands->argv, bash);
@@ -85,6 +86,13 @@ static void	process_input(char *line, t_bash *bash)
     else if (bash->commands)
     {
         run_external_cmd(bash->commands, bash);
+    }
+    */
+    if (bash->commands)
+    {
+        bash->exit_status = execute_command(bash->commands, bash);
+        free_commands(bash->commands);
+        bash->commands = NULL;
     }
     else
     {
@@ -103,8 +111,12 @@ int	main(int ac, char **av, char **envp)
 	(void)av;
 	if (init_minishell(&bash, envp))
 		return (exit_failure(&bash));
+    int saved_stdin = dup(STDIN_FILENO);
+    int saved_stdout = dup(STDOUT_FILENO);
 	while (1)
 	{
+	    dup2(saved_stdin, STDIN_FILENO);
+	    dup2(saved_stdout, STDOUT_FILENO);
 		line = readline("minishell $> ");
 		if (!line)
 		{

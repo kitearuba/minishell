@@ -14,11 +14,14 @@
 
 void	free_all_and_exit(t_bash *bash, int exit_code)
 {
-    if (bash->env)
-        free_2d_array(bash->env);
-    if (bash->tokens)
-        free_tokens(bash->tokens);
-    if (bash->commands)
-        free_commands(bash->commands);
+    if (bash)
+    {
+        if (bash->env)
+            free_2d_array(bash->env);
+        if (bash->tokens)
+            free_tokens(bash->tokens);
+        if (bash->commands)
+            free_commands(bash->commands);
+    }
     exit(exit_code);
 }

@@ -71,7 +71,10 @@ void		add_redirection(t_command *cmd, int type, char *filename);
 int			execute_command(t_command *cmds, t_bash *bash);
 int			is_builtin(const char *cmd);
 int			run_builtin(char **argv, t_bash *bash);
-int			run_external_cmd(t_command *cmd, t_bash *bash);
+void	    execve_cmd(char **argv, char **env, t_bash *bash);
+int         apply_redirections(t_redirection *redir, t_bash *bash);
+int         handle_heredoc(t_redirection *redir);
+int         exec_external(char **args, t_bash *bash);
 
 /* --- Command Path --- */
 char		*get_cmd_path(char *cmd, char **envp);
@@ -84,6 +87,11 @@ void		free_2d_array(char **arr);
 void		free_tokens(t_token *tokens);
 void		free_commands(t_command *cmd);
 void        free_all_and_exit(t_bash *bash, int exit_code);
+
+/* --- Pipes --- */
+int         execute_pipeline(t_command *cmds, t_bash *bash);
+void	create_pipe(int *pipefd, t_bash *bash);
+int fork_and_exec(t_command *cmd, int input_fd, int output_fd, t_bash *bash);
 
 /* --- Debug / Testing --- */
 void		print_tokens(t_token *list);
