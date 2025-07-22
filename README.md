@@ -20,7 +20,7 @@ It is **not a reference implementation** and may be made private once completed.
 
 * [⚙️ Project Overview](#️-project-overview)
 * [🧭 Project Architecture & Flow (for Collaborators)](#-project-architecture--flow-for-collaborators)
-* [🗕️ Development Status *(Last Updated: July 21, 2025)*](#-development-status-last-updated-july-21-2025)
+* [🗕️ Development Status *(Last Updated: July 22, 2025)*](#-development-status-last-updated-july-22-2025)
 * [🔜 Upcoming Tasks](#-upcoming-tasks)
 * [👥 Contributors](#-contributors)
 * [📁 Repository Structure](#-repository-structure)
@@ -32,13 +32,13 @@ It is **not a reference implementation** and may be made private once completed.
 ## ⚙️ Project Overview
 
 **Minishell** is a Bash-inspired shell written in C, adhering to the 42 School specifications.
-It aims to replicate essential shell behavior:
+It replicates essential shell behavior:
 
 * Execute built-in and external commands
-* Handle redirections: `<`, `>`, `>>`, `<<` (heredoc)
+* Handle redirections: `<`, `>`, `>>`, `<<`
 * Manage pipes (`|`) with correct input/output propagation
 * Expand environment variables: `$VAR`, `$?`
-* Provide an interactive prompt with `readline`
+* Provide an interactive prompt using `readline`
 * Maintain and propagate exit statuses
 
 Key concepts covered:
@@ -55,7 +55,9 @@ Key concepts covered:
 
 ### 🔹 1. `main()` — The Shell Loop
 
-Located in `minishell.c`, it handles:
+**File:** `minishell.c`
+
+Handles:
 
 * Prompt display
 * Input reading
@@ -67,7 +69,7 @@ tokens = tokenize_input(line);
 tokens = expand_env_vars(tokens, bash);
 cmds = parse_tokens(tokens);
 execute_command(cmds, bash);
-```
+````
 
 ---
 
@@ -75,43 +77,34 @@ execute_command(cmds, bash);
 
 **File:** `src/initiation/tokenize.c`
 
-Tokenizes user input into:
+Tokenizes input into:
 
 * `WORD`, `PIPE`, `REDIRECT`, `ENV_VAR`, `SINGLE_QUOTE`, `DOUBLE_QUOTE`
 
-Example:
-
-```shell
-echo $USER | grep world
-# → [WORD:echo] → [ENV_VAR:$USER] → [PIPE:|] → [WORD:grep] → [WORD:world]
-```
-
 ---
 
-### 🔹 3. `expand_env_vars()` — Variable Expansion
+### 🔹 3. `expand_env_vars()` — Environment Expansion
 
 **File:** `src/env/expand.c`
 
 Replaces:
 
-* `$VAR` with its value from `bash->env`
+* `$VAR` with value from `bash->env`
 * `$?` with last exit status
-
-Resulting `ENV_VAR` tokens are transformed into `WORD`.
 
 ---
 
-### 🔹 4. `parse_tokens()` — Syntax Parsing
+### 🔹 4. `parse_tokens()` — Parser
 
 **File:** `src/initiation/parse_tokens.c`
 
-Builds a linked list of `t_command`, where each node represents a command segment (used in pipes or solo):
+Builds a linked list of `t_command` from tokens:
 
 ```c
 t_command:
-  argv: {"cat", "<<", "END"}
+  argv: {"ls", "-l"}
   next → t_command:
-    argv: {"grep", "hello"}
+    argv: {"wc", "-l"}
 ```
 
 ---
@@ -120,12 +113,12 @@ t_command:
 
 **File:** `src/cmd/execute_commands.c`
 
-Dispatches to:
+Routes commands to:
 
-* Built-ins (`cd`, `export`, etc.)
-* External commands (via `execve`)
-* Pipe handlers (`execute_pipeline()`)
-* Redirections (using helpers in `executor/`)
+* Built-ins
+* External programs (`execve`)
+* Pipe executor
+* Redirection handler
 
 ---
 
@@ -133,18 +126,14 @@ Dispatches to:
 
 **Files:**
 
-* `src/executor/redirections/` (TBD / partially implemented)
-* `src/executor/heredoc.c` (under development)
+* `src/executor/redirections/` (under construction)
+* `src/executor/heredoc.c`
 
-Handles:
+Handles `<`, `>`, `>>`, `<<`
 
-* Input `<` and output redirection `>`/`>>`
-* Here-document input (`<<`) using temporary buffer file or pipe with `fork()` + `write()`
+Heredoc now works with pipes:
 
-Recent progress:
-✅ Heredoc tested with pipelines, e.g.:
-
-```shell
+```bash
 cat << EOF | grep hello
 hello
 world
@@ -153,7 +142,19 @@ EOF
 
 ---
 
-### 🔹 7. Shell State (`t_bash`)
+### 🔹 7. Pipes
+
+**File:** `src/executor/pipes/execute_pipeline.c`
+
+Handles multi-stage pipelines via forked children:
+
+```bash
+ls -l | grep txt | wc -l
+```
+
+---
+
+### 🔹 8. Shell State (`t_bash`)
 
 ```c
 typedef struct s_bash {
@@ -164,59 +165,62 @@ typedef struct s_bash {
 } t_bash;
 ```
 
-Accessible across all logic layers.
-
 ---
 
-### 🔹 8. Utilities
+### 🔹 9. Utilities
 
 **Files:** `src/utils/`
 
-* `free_tokens()`, `free_commands()`
-* `free_2d_array()`, `ft_getenv()`
-* `free_all_and_exit()` — safe shutdown
+Includes:
+
+* `free_tokens()`, `free_commands()`, `free_2d_array()`
+* `ft_getenv()`, `free_all_and_exit()`
 
 ---
 
-## 🗕️ Development Status *(Last Updated: July 21, 2025)*
+## 🗕️ Development Status *(Last Updated: July 22, 2025)*
 
-### ✅ Completed
+### ✅ Mandatory Part — Completed
 
-* [x] Lexer & tokenizer with quote/pipe/env support
-* [x] Parser: `t_token → t_command`
-* [x] Env expansion for `$VAR` and `$?`
-* [x] Custom environment storage (`char **env`)
-* [x] Built-in commands (`cd`, `export`, etc.)
-* [x] Pipeline execution using `t_command->next`
-* [x] Heredoc parsing and partial execution via `cat << END | ...`
-* [x] Full memory cleanup on exit
+* [x] Tokenizer with quote/env/pipe handling
+* [x] Parser from token list → command list
+* [x] Environment variable expansion
+* [x] Custom `char **env` structure
+* [x] Built-ins: `cd`, `echo`, `env`, `export`, `pwd`, `unset`, `exit`
+* [x] Pipeline execution logic
+* [x] Heredoc with pipe support
+* [x] Full memory cleanup
+* [x] Exit status management
 
-### 🛠️ In Progress
+### ☑️ Bonus Part — In Progress
 
-* [ ] Final redirection integration (`<`, `>`, `>>`, `<<`)
-* [ ] Pipe + heredoc chaining edge cases
-* [ ] Signal handling (Ctrl-C / Ctrl-D)
-* [ ] Syntax error detection and feedback
-* [ ] Norm & 42 compliance audit (25-line, 80-col, etc.)
+* [x] Wildcard expansion (`*`) for matching files (bonus)
+* [x] Heredoc chaining with pipe
+* [ ] Logical operators: `&&`, `||` (bonus)
+* [ ] Subshells: `(cmd)` using parentheses (bonus)
+* [ ] Advanced redirection chaining
+* [ ] Signal behavior polishing (Ctrl-C, Ctrl-D)
 
 ---
 
 ## 🔜 Upcoming Tasks
 
-* Finalize `<<` into stdin pipe buffer logic
-* Refactor executor into modular handlers
-* Add error messages for bad syntax and permissions
-* Normalize struct access (`bash->env`, etc.)
-* Expand test coverage (quotes inside heredoc, nested redir, etc.)
+* Finalize bonus logic for `&&`, `||`, and subshells `(cmd)`
+* Redirection edge case handling and chaining
+* Final signal behavior consistency
+* Apply full 42 Norm compliance:
+
+    * 25-line function limit
+    * 80-column width
+    * Header format
+* Add more test cases (edge quotes, nested redir, wildcard filters)
 
 ---
 
 ## 👥 Contributors
 
-* **chrrodri** — Project structure, lexer/parser, pipe logic, cleanup tools
-* **bsamy** — Redirection, heredoc logic, built-in logic, token/command flow
-
-Both are students at **42 Barcelona**.
+* **chrrodri** — Architecture, lexer/parser, pipe logic, env system
+* **bsamy** — Redirections, built-ins, wildcard, heredoc, expansion
 
 ---
 
@@ -261,21 +265,11 @@ line
 EOF
 ```
 
-Recommended file walkthrough:
-
-* `minishell.c`
-* `tokenize.c` → `expand_env_vars.c`
-* `parse_tokens.c`
-* `execute_commands.c`
-* `executor/pipes/execute_pipeline.c`
-* `executor/redirections/`
-* `utils/free_all_and_exit.c`
-
 ---
 
 ## 📌 Disclaimer
 
-This project is created for educational purposes at 42 School.
-Not suitable for production use.
+This project was created for educational use at 42 School.
+Not intended for production environments.
 
-📌 *Last updated: July 21, 2025*
+📌 *Last updated: July 22, 2025*
