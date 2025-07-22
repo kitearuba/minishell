@@ -23,6 +23,7 @@
 # include <sys/types.h>
 # include <sys/wait.h>
 # include <signal.h>
+#include <dirent.h>
 
 /* --- Readline Libraries --- */
 # include <readline/readline.h>
@@ -44,7 +45,8 @@ extern volatile sig_atomic_t g_heredoc_interrupted;
 
 /* --- Tokenizer --- */
 t_token		*tokenize_input(const char *input);
-t_token		*new_token(t_token_type type, const char *start, size_t len);
+t_token		*new_token(t_token_type type, const char *start, size_t len,
+                int quoted);
 void		add_token(t_token **head, t_token *new);
 size_t		handle_word(const char *input, t_token **tokens, size_t i);
 size_t		handle_pipe(const char *input, t_token **tokens, size_t i);
@@ -54,6 +56,7 @@ char		*extract_quoted_token(const char *line, size_t *index);
 void		expand_env_vars(t_token *tokens, t_bash *bash);
 char		*get_env_value(const char *key, char **env);
 char		*append_and_free(char *s1, char *s2);
+void	    expand_wildcards(t_token **tokens);
 
 /* --- Parser --- */
 t_command	*parse_tokens(t_token *tokens);
@@ -66,7 +69,7 @@ int			check_trailing_pipe(t_token *tokens, t_command *head,
 				t_command *current);
 int			check_consecutive_pipes(t_token *tok, t_command **current);
 int			check_initial_errors(t_token *tok);
-t_command	*handle_parse_error(t_command *head, t_command *current);
+t_command	*handle_parse_error(t_command *head, t_command *current, t_list *args);
 int			check_commandless_redirection(t_command *head);
 int			handle_parse_redirection(t_token *tok, t_command **current);
 void		add_redirection(t_command *cmd, int type, char *filename);
@@ -101,6 +104,8 @@ int fork_and_exec(t_command *cmd, int input_fd, int output_fd, t_bash *bash);
 void	setup_signal_handlers(void);
 void	setup_child_signals(void);
 
+/* --- wildcard --- */
+char	**expand_token_if_wildcard(char *token);
 /* --- Debug / Testing --- */
 void		print_tokens(t_token *list);
 void		print_commands(t_command *cmd);

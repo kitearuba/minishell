@@ -12,7 +12,7 @@
 
 #include "../../include/minishell.h"
 
-t_token	*new_token(t_token_type type, const char *start, size_t len)
+t_token	*new_token(t_token_type type, const char *start, size_t len, int quoted)
 {
 	t_token	*token;
 
@@ -21,6 +21,7 @@ t_token	*new_token(t_token_type type, const char *start, size_t len)
 		return (NULL);
 	token->type = type;
 	token->value = ft_substr(start, 0, len);
+    token->quoted = quoted;
 	token->next = NULL;
 	return (token);
 }
@@ -42,7 +43,7 @@ void	add_token(t_token **head, t_token *new)
 
 size_t	handle_pipe(const char *input, t_token **tokens, size_t i)
 {
-	add_token(tokens, new_token(PIPE, &input[i], 1));
+	add_token(tokens, new_token(PIPE, &input[i], 1, 0));
 	return (i + 1);
 }
 
@@ -60,7 +61,7 @@ size_t	handle_word(const char *input, t_token **tokens, size_t i)
 		&& input[i] != '"'
 		&& input[i] != '$')
 		i++;
-	add_token(tokens, new_token(WORD, &input[start], i - start));
+	add_token(tokens, new_token(WORD, &input[start], i - start, 0));
 	return (i);
 }
 

@@ -52,12 +52,16 @@ void	add_redirection(t_command *cmd, int type, char *filename)
 	}
 }
 
-t_command	*handle_parse_error(t_command *head, t_command *current)
+t_command	*handle_parse_error(t_command *head, t_command *current, t_list *args)
 {
 	if (head)
 		free_commands(head);
 	if (current)
 		free_commands(current);
+    if (args)
+    {
+        ft_lstclear(&args, free);
+    }
 	return (NULL);
 }
 

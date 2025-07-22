@@ -1,5 +1,77 @@
 #include "../../include/minishell.h"
 
+static int	is_wildcard(const char *str)
+{
+    while (*str)
+    {
+        if (*str == '*')
+            return (1);
+        str++;
+    }
+    return (0);
+}
+
+static int	match_pattern(const char *pattern, const char *filename)
+{
+    if (*pattern == '\0' && *filename == '\0')
+        return (1);
+    if (*pattern == '*')
+        return (match_pattern(pattern + 1, filename) ||
+                (*filename && match_pattern(pattern, filename + 1)));
+    if (*pattern == *filename)
+        return (match_pattern(pattern + 1, filename + 1));
+    return (0);
+}
+
+static char **list_to_array(t_list *lst)
+{
+    int		len = ft_lstsize(lst);
+    char	**array = malloc(sizeof(char *) * (len + 1));
+    int		i = 0;
+
+    if (!array)
+        return (NULL);
+    while (lst)
+    {
+        array[i++] = lst->content;
+        lst = lst->next;
+    }
+    array[i] = NULL;
+    return (array);
+}
+
+ static char	**get_matches(const char *pattern)
+{
+    DIR				*dir;
+    struct dirent	*entry;
+    t_list			*matches = NULL;
+    char			**result;
+
+    dir = opendir(".");
+    if (!dir)
+        return (NULL);
+    while ((entry = readdir(dir)))
+    {
+        if (entry->d_name[0] == '.')
+            continue;
+        if (match_pattern(pattern, entry->d_name))
+            ft_lstadd_back(&matches, ft_lstnew(ft_strdup(entry->d_name)));
+    }
+    closedir(dir);
+    result = list_to_array(matches);
+    ft_lstclear(&matches, free);
+    return (result);
+}
+
+char	**expand_token_if_wildcard(char *token)
+{
+    if (!is_wildcard(token))
+        return (ft_split(token, ' '));
+    return (get_matches(token));
+}
+
+
+/*
 // for more storage capacity
 t_wildcard *resize_matches(t_wildcard *wc)
 {
@@ -115,3 +187,4 @@ char **replace_with_matches(char **args, int index, t_wildcard *wc)
     new_args[i] = NULL;
     return (new_args);
 }
+*/

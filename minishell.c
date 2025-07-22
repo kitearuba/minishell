@@ -75,6 +75,7 @@ static void	process_input(char *line, t_bash *bash)
     if (!bash->tokens)
         return ;
     expand_env_vars(bash->tokens, bash);
+    expand_wildcards(&bash->tokens);
     bash->commands = parse_tokens(bash->tokens);
     /*
     if (bash->commands && is_builtin(bash->commands->argv[0]))

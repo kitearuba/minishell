@@ -41,6 +41,7 @@ SRC = 	minishell.c \
 		$(SRC_DIR)/initiation/last_token_is_pipe.c \
 		$(SRC_DIR)/expand/expand.c \
 		$(SRC_DIR)/expand/expand_utils.c \
+		$(SRC_DIR)/expand/expand_wildcard.c \
 		$(SRC_DIR)/env/ft_getenv.c \
 		$(SRC_DIR)/utils/free_2d_array.c \
 		$(SRC_DIR)/utils/free_tokens.c \
@@ -65,6 +66,7 @@ SRC = 	minishell.c \
         $(SRC_DIR)/builtin/ft_exit.c \
         $(SRC_DIR)/builtin/builtin_utils.c \
         $(SRC_DIR)/signal/signal.c \
+        $(SRC_DIR)/bonus/wildcard.c \
         $(SRC_DIR)/tests/print.c
 
 

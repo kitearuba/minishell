@@ -1,5 +1,8 @@
 #include "../../include/minishell.h"
 
+
+
+/*
 void free_wildcard(t_wildcard *wc)
 {
     int i;
@@ -63,4 +66,4 @@ int match_pattern(char *pattern, char *filename)
 {
     // compare if there is a match between a pattern(*, ?, []) and a string
     return (fnmatch(pattern, filename, FNM_PERIOD) == 0);
-}
+}*/

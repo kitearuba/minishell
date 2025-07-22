@@ -16,22 +16,22 @@ static size_t	handle_redirect(const char *input, t_token **tokens, size_t i)
 {
 	if (input[i] == '>' && input[i + 1] == '>')
 	{
-		add_token(tokens, new_token(REDIRECT_APPEND, &input[i], 2));
+		add_token(tokens, new_token(REDIRECT_APPEND, &input[i], 2, 0));
 		i += 2;
 	}
 	else if (input[i] == '<' && input[i + 1] == '<')
 	{
-		add_token(tokens, new_token(HEREDOC, &input[i], 2));
+		add_token(tokens, new_token(HEREDOC, &input[i], 2, 0));
 		i += 2;
 	}
 	else if (input[i] == '>')
 	{
-		add_token(tokens, new_token(REDIRECT_OUT, &input[i], 1));
+		add_token(tokens, new_token(REDIRECT_OUT, &input[i], 1, 0));
 		i++;
 	}
 	else
 	{
-		add_token(tokens, new_token(REDIRECT_IN, &input[i], 1));
+		add_token(tokens, new_token(REDIRECT_IN, &input[i], 1, 0));
 		i++;
 	}
 	while (input[i] == ' ')
@@ -41,19 +41,16 @@ static size_t	handle_redirect(const char *input, t_token **tokens, size_t i)
 
 static int	handle_quotes(const char *input, t_token **tokens, size_t *i)
 {
-	char			*quoted;
-	t_token_type	type;
+    char	*quoted;
+    int		quoted_flag;
 
-	quoted = extract_quoted_token(input, i);
-	if (!quoted)
-		return (0);
-	if (input[*i - 1] == '\'')
-		type = SINGLE_QUOTE;
-	else
-		type = DOUBLE_QUOTE;
-	add_token(tokens, new_token(type, quoted, ft_strlen(quoted)));
-	free(quoted);
-	return (1);
+    quoted_flag = (input[*i] == '\'') ? 1 : 2;
+    quoted = extract_quoted_token(input, i);
+    if (!quoted)
+        return (0);
+    add_token(tokens, new_token(WORD, quoted, ft_strlen(quoted), quoted_flag));
+    free(quoted);
+    return (1);
 }
 
 static size_t	handle_env_var(const char *input, t_token **tokens, size_t i)
@@ -62,7 +59,7 @@ static size_t	handle_env_var(const char *input, t_token **tokens, size_t i)
 
 	if (input[i + 1] == '?')
 	{
-		add_token(tokens, new_token(ENV_VAR, &input[i], 2));
+		add_token(tokens, new_token(ENV_VAR, &input[i], 2, 0));
 		return (i + 2);
 	}
 	start = i + 1;
@@ -71,10 +68,10 @@ static size_t	handle_env_var(const char *input, t_token **tokens, size_t i)
 		i++;
 	if (i == start)
 	{
-		add_token(tokens, new_token(WORD, &input[i - 1], 1));
+		add_token(tokens, new_token(WORD, &input[i - 1], 1, 0));
 		return (start);
 	}
-	add_token(tokens, new_token(ENV_VAR, &input[start - 1], i - start + 1));
+	add_token(tokens, new_token(ENV_VAR, &input[start - 1], i - start + 1, 0));
 	return (i);
 }
 
