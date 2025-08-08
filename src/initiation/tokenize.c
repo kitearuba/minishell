@@ -41,16 +41,19 @@ static size_t	handle_redirect(const char *input, t_token **tokens, size_t i)
 
 static int	handle_quotes(const char *input, t_token **tokens, size_t *i)
 {
-    char	*quoted;
-    int		quoted_flag;
+	char	*quoted;
+	int		quoted_flag;
 
-    quoted_flag = (input[*i] == '\'') ? 1 : 2;
-    quoted = extract_quoted_token(input, i);
-    if (!quoted)
-        return (0);
-    add_token(tokens, new_token(WORD, quoted, ft_strlen(quoted), quoted_flag));
-    free(quoted);
-    return (1);
+	if (input[*i] == '\'')
+		quoted_flag = 1;
+	else
+		quoted_flag = 2;
+	quoted = extract_quoted_token(input, i);
+	if (!quoted)
+		return (0);
+	add_token(tokens, new_token(WORD, quoted, ft_strlen(quoted), quoted_flag));
+	free(quoted);
+	return (1);
 }
 
 static size_t	handle_env_var(const char *input, t_token **tokens, size_t i)

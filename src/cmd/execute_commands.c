@@ -1,7 +1,7 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   execute_commands.c                                          :+:      :+:    :+:   */
+/*   execute_commands.c                                 :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: chrrodri <chrrodri@student.42barcelona.co  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
@@ -14,20 +14,20 @@
 
 int	execute_command(t_command *cmds, t_bash *bash)
 {
-    if (!cmds)
-        return (127);
-    if (cmds->next)
-    {
-        execute_pipeline(cmds, bash);
-        return (bash->exit_status);
-    }
-    if (!cmds->argv || !cmds->argv[0])
-        return (127);
-    if (apply_redirections(cmds->redirection, bash))
-        return (1);
-    if (is_builtin(cmds->argv[0]))
-        bash->exit_status = run_builtin(cmds->argv, bash);
-    else
-        bash->exit_status = exec_external(cmds->argv, bash);
-    return (bash->exit_status);
+	if (!cmds)
+		return (127);
+	if (cmds->next)
+	{
+		execute_pipeline(cmds, bash);
+		return (bash->exit_status);
+	}
+	if (!cmds->argv || !cmds->argv[0])
+		return (127);
+	if (apply_redirections(cmds->redirection, bash))
+		return (1);
+	if (is_builtin(cmds->argv[0]))
+		bash->exit_status = run_builtin(cmds->argv, bash);
+	else
+		bash->exit_status = exec_external(cmds->argv, bash);
+	return (bash->exit_status);
 }

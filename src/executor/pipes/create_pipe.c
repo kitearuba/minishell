@@ -12,11 +12,6 @@
 
 #include "../../../include/minishell.h"
 
-/**
- * create_pipe - Creates a pipe for inter-process communication.
- * @pipefd: Array to store the file descriptors for the pipe ends.
- * @bash: Pointer to t_bash structure (optional, for exiting cleanly).
- */
 void	create_pipe(int *pipefd, t_bash *bash)
 {
 	if (pipe(pipefd) == -1)

@@ -52,16 +52,15 @@ void	add_redirection(t_command *cmd, int type, char *filename)
 	}
 }
 
-t_command	*handle_parse_error(t_command *head, t_command *current, t_list *args)
+t_command	*handle_parse_error(
+	t_command *head, t_command *current, t_list *args)
 {
 	if (head)
 		free_commands(head);
 	if (current)
 		free_commands(current);
-    if (args)
-    {
-        ft_lstclear(&args, free);
-    }
+	if (args)
+		ft_lstclear(&args, free);
 	return (NULL);
 }
 
@@ -72,7 +71,8 @@ int	handle_parse_redirection(t_token *tok, t_command **current)
 		add_redirection(*current, tok->type, tok->next->value);
 		return (0);
 	}
-	ft_printf_fd(2, "Syntax error: missing filename after redirection\n");
+	ft_printf_fd(2,
+		"Syntax error: missing filename after redirection\n");
 	free_commands(*current);
 	*current = NULL;
 	return (1);

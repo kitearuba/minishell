@@ -6,47 +6,58 @@
 /*   By: chrrodri <chrrodri@student.42barcelona.co  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/20 14:00:00 by chrrodri          #+#    #+#             */
-/*   Updated: 2025/07/20 14:45:00 by chrrodri         ###   ########.fr       */
+/*   Updated: 2025/08/08 03:15:00 by chrrodri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../../../include/minishell.h"
 
-static void	child_process(t_command *cmd, int input_fd, int output_fd, t_bash *bash)
+static void	child_process(
+	t_command *cmd, int input_fd, int output_fd, t_bash *bash)
 {
-	if (dup2(input_fd, STDIN_FILENO) == -1 || dup2(output_fd, STDOUT_FILENO) == -1)
+	if (dup2(input_fd, STDIN_FILENO) == -1
+		|| dup2(output_fd, STDOUT_FILENO) == -1)
 		free_all_and_exit(bash, 1);
 	if (input_fd != STDIN_FILENO)
 		close(input_fd);
 	if (output_fd != STDOUT_FILENO)
 		close(output_fd);
-    setup_child_signals();
-    if (apply_redirections(cmd->redirection, bash))
+	setup_child_signals();
+	if (apply_redirections(cmd->redirection, bash))
 		free_all_and_exit(bash, 1);
 	execve_cmd(cmd->argv, bash->env, bash);
+}
+
+static void	pipe_child(
+	t_command *cmd, int *input_fd, int pipefd[2], t_bash *bash)
+{
+	pid_t	pid;
+
+	if (pipe(pipefd) == -1)
+		free_all_and_exit(bash, 1);
+	pid = fork();
+	if (pid < 0)
+		free_all_and_exit(bash, 1);
+	else if (pid == 0)
+		child_process(cmd, *input_fd, pipefd[1], bash);
+	close(pipefd[1]);
+	if (*input_fd != STDIN_FILENO)
+		close(*input_fd);
+	*input_fd = pipefd[0];
 }
 
 int	execute_pipeline(t_command *cmd, t_bash *bash)
 {
 	int		pipefd[2];
-	int		input_fd = STDIN_FILENO;
-	pid_t	last_pid = -1;
-	pid_t	pid;
-    int status;
+	int		input_fd;
+	pid_t	last_pid;
+	int		status;
 
+	input_fd = STDIN_FILENO;
+	last_pid = -1;
 	while (cmd->next)
 	{
-		if (pipe(pipefd) == -1)
-			free_all_and_exit(bash, 1);
-		pid = fork();
-		if (pid < 0)
-			free_all_and_exit(bash, 1);
-		else if (pid == 0)
-			child_process(cmd, input_fd, pipefd[1], bash);
-		close(pipefd[1]);
-		if (input_fd != STDIN_FILENO)
-			close(input_fd);
-		input_fd = pipefd[0];
+		pipe_child(cmd, &input_fd, pipefd, bash);
 		cmd = cmd->next;
 	}
 	last_pid = fork();

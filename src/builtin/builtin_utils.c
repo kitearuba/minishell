@@ -1,19 +1,31 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   builtin_utils.c                                    :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: chrrodri <chrrodri@student.42barcelona.co  +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2025/08/07 03:30:00 by chrrodri          #+#    #+#             */
+/*   Updated: 2025/08/07 03:30:00 by chrrodri         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "../../include/minishell.h"
 
-int is_valid_identifier(const char *str)
+int	is_valid_identifier(const char *str)
 {
-    int i;
+	int	i;
 
-    if (!str || !ft_isalpha(str[0]))
-        return (0);
-    i = 1;
-    while (str[i])
-    {
-        if (!ft_isalnum(str[i]) && str[i] != '_')
-            return (0);
-        i++;
-    }
-    return (1);
+	if (!str || !ft_isalpha(str[0]))
+		return (0);
+	i = 1;
+	while (str[i])
+	{
+		if (!ft_isalnum(str[i]) && str[i] != '_')
+			return (0);
+		i++;
+	}
+	return (1);
 }
 
 char	**copy_env(char **env)

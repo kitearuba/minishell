@@ -21,7 +21,7 @@ t_token	*new_token(t_token_type type, const char *start, size_t len, int quoted)
 		return (NULL);
 	token->type = type;
 	token->value = ft_substr(start, 0, len);
-    token->quoted = quoted;
+	token->quoted = quoted;
 	token->next = NULL;
 	return (token);
 }

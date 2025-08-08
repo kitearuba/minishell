@@ -1,7 +1,7 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   minishell.c                                        :+:      :+:    :+:   */
+/*   init_minishell.c                                   :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: chrrodri <chrrodri@student.42barcelona.co  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
@@ -10,18 +10,44 @@
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "./include/minishell.h"
+#include "../../include/minishell.h"
 
-int	main(int ac, char **av, char **envp)
+static char	**copy_envp(char **envp)
 {
-	t_bash	bash;
+	int		count;
+	char	**env_copy;
+	int		i;
 
-	(void)ac;
-	(void)av;
-	if (init_minishell(&bash, envp))
-		return (exit_failure(&bash));
-	minishell_loop(&bash);
-	clear_history();
-	free_all_and_exit(&bash, 0);
+	count = 0;
+	while (envp[count])
+		count++;
+	env_copy = malloc(sizeof(char *) * (count + 1));
+	if (!env_copy)
+		return (NULL);
+	i = 0;
+	while (i < count)
+	{
+		env_copy[i] = strdup(envp[i]);
+		if (!env_copy[i])
+		{
+			while (i--)
+				free(env_copy[i]);
+			free(env_copy);
+			return (NULL);
+		}
+		i++;
+	}
+	env_copy[i] = NULL;
+	return (env_copy);
+}
+
+int	init_minishell(t_bash *bash, char **envp)
+{
+	bash->env = copy_envp(envp);
+	if (!bash->env)
+		return (1);
+	bash->exit_status = 0;
+	bash->tokens = NULL;
+	bash->commands = NULL;
 	return (0);
 }

@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   ft_exit.c                                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: chrrodri <chrrodri@student.42barcelona.co  +#+  +:+       +#+        */
+/*   By: chrrodri <chrrodri@student.42barcelona.co> +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/18 23:25:00 by chrrodri          #+#    #+#             */
-/*   Updated: 2025/07/19 00:30:00 by chrrodri         ###   ########.fr       */
+/*   Updated: 2025/08/07 05:45:00 by chrrodri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,8 +14,9 @@
 
 static int	is_numeric(const char *str)
 {
-	int	i = 0;
+	int	i;
 
+	i = 0;
 	if (!str || !*str)
 		return (0);
 	if (str[i] == '-' || str[i] == '+')

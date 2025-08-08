@@ -14,9 +14,9 @@
 
 int	last_token_is_pipe(t_token *tok)
 {
-    if (!tok)
-        return (0);
-    while (tok->next)
-        tok = tok->next;
-    return (tok->type == PIPE);
+	if (!tok)
+		return (0);
+	while (tok->next)
+		tok = tok->next;
+	return (tok->type == PIPE);
 }

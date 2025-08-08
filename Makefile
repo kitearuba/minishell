@@ -33,15 +33,19 @@ DEPS            = $(HEADER) $(MAKEFILE)
 #                          Source Files and Objects                            #
 # **************************************************************************** #
 SRC = 	minishell.c \
+		$(SRC_DIR)/initiation/init_minishell.c \
+		$(SRC_DIR)/initiation/execute_minishell.c \
 		$(SRC_DIR)/initiation/tokenize.c \
 		$(SRC_DIR)/initiation/tokenizer_utils.c \
 		$(SRC_DIR)/initiation/parse_tokens.c \
 		$(SRC_DIR)/initiation/parse_utils.c \
+		$(SRC_DIR)/initiation/parse_utils2.c \
 		$(SRC_DIR)/initiation/parser_checks.c \
 		$(SRC_DIR)/initiation/last_token_is_pipe.c \
 		$(SRC_DIR)/expand/expand.c \
 		$(SRC_DIR)/expand/expand_utils.c \
 		$(SRC_DIR)/expand/expand_wildcard.c \
+		$(SRC_DIR)/expand/wildcard_utils.c \
 		$(SRC_DIR)/env/ft_getenv.c \
 		$(SRC_DIR)/utils/free_2d_array.c \
 		$(SRC_DIR)/utils/free_tokens.c \
@@ -67,7 +71,6 @@ SRC = 	minishell.c \
         $(SRC_DIR)/builtin/builtin_utils.c \
         $(SRC_DIR)/signal/signal.c \
         $(SRC_DIR)/bonus/wildcard.c \
-        $(SRC_DIR)/tests/print.c
 
 
 OBJ         = $(SRC:.c=.o)
