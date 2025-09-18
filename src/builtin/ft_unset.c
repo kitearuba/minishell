@@ -12,76 +12,81 @@
 
 #include "../../include/minishell.h"
 
-static int	ft_arrlen(char **arr)
+static int	env_index_of(char **env, const char *key)
 {
-	int	len;
+	size_t	klen;
+	int		i;
 
-	len = 0;
-	while (arr && arr[len])
-		len++;
-	return (len);
+	if (!env || !key)
+		return (-1);
+	klen = ft_strlen(key);
+	i = 0;
+	while (env[i])
+	{
+		if (!ft_strncmp(env[i], key, klen) && env[i][klen] == '=')
+			return (i);
+		i++;
+	}
+	return (-1);
 }
 
-static void	copy_env_excluding(char **new_env, char **old_env, char *key)
+static int	env_remove_at(t_bash *bash, int idx)
 {
+	char	**newenv;
+	int		len;
 	int		i;
 	int		j;
-	size_t	key_len;
 
+	if (idx < 0)
+		return (0);
+	len = 0;
+	while (bash->env[len])
+		len++;
+	newenv = (char **)malloc(sizeof(char *) * len);
+	if (!newenv)
+		return (1);
 	i = 0;
 	j = 0;
-	key_len = ft_strlen(key);
-	while (old_env[i])
+	while (bash->env[i])
 	{
-		if (ft_strncmp(old_env[i], key, key_len) == 0
-			&& old_env[i][key_len] == '=')
-			i++;
+		if (i != idx)
+			newenv[j++] = bash->env[i];
 		else
-		{
-			new_env[j] = ft_strdup(old_env[i]);
-			j++;
-			i++;
-		}
+			free(bash->env[i]);
+		i++;
 	}
-	new_env[j] = NULL;
-}
-
-static void	remove_env_var(t_bash *bash, char *key)
-{
-	int		new_len;
-	char	**new_env;
-
-	new_len = ft_arrlen(bash->env);
-	new_env = malloc(sizeof(char *) * new_len);
-	if (!new_env)
-		return ;
-	copy_env_excluding(new_env, bash->env, key);
-	free_2d_array(bash->env);
-	bash->env = new_env;
+	newenv[j] = NULL;
+	free(bash->env);
+	bash->env = newenv;
+	return (0);
 }
 
 int	ft_unset(char **argv, t_bash *bash)
 {
 	int	i;
-	int	status;
+	int	err;
+	int	idx;
 
 	if (!argv || !bash)
 		return (1);
-	status = 0;
+	err = 0;
 	i = 1;
 	while (argv[i])
 	{
 		if (!is_valid_identifier(argv[i]))
 		{
 			ft_printf_fd(STDERR_FILENO,
-				"minishell: unset: `%s': not a valid identifier\n",
-				argv[i]);
-			status = 1;
+				"minishell: unset: `%s': not a valid identifier\n", argv[i]);
+			err = 1;
 		}
 		else
-			remove_env_var(bash, argv[i]);
+		{
+			idx = env_index_of(bash->env, argv[i]);
+			if (idx >= 0 && env_remove_at(bash, idx) != 0)
+				err = 1;
+		}
 		i++;
 	}
-	bash->exit_status = status;
-	return (0);
+	bash->exit_status = err;
+	return (err);
 }

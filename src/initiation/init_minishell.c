@@ -12,42 +12,46 @@
 
 #include "../../include/minishell.h"
 
-static char	**copy_envp(char **envp)
+static int	env_count(char **envp)
 {
-	int		count;
-	char	**env_copy;
-	int		i;
+    int	i;
 
-	count = 0;
-	while (envp[count])
-		count++;
-	env_copy = malloc(sizeof(char *) * (count + 1));
-	if (!env_copy)
-		return (NULL);
-	i = 0;
-	while (i < count)
-	{
-		env_copy[i] = strdup(envp[i]);
-		if (!env_copy[i])
-		{
-			while (i--)
-				free(env_copy[i]);
-			free(env_copy);
-			return (NULL);
-		}
-		i++;
-	}
-	env_copy[i] = NULL;
-	return (env_copy);
+    i = 0;
+    while (envp && envp[i])
+        i++;
+    return (i);
+}
+
+static char	**env_deep_copy(char **envp)
+{
+    int		n;
+    int		i;
+    char	**dup;
+
+    n = env_count(envp);
+    dup = (char **)malloc(sizeof(char *) * (n + 1));
+    if (!dup)
+        return (NULL);
+    i = 0;
+    while (i < n)
+    {
+        dup[i] = ft_strdup(envp[i]);
+        if (!dup[i])
+            return (free_2d_array(dup), (char **)NULL);
+        i++;
+    }
+    dup[i] = NULL;
+    return (dup);
 }
 
 int	init_minishell(t_bash *bash, char **envp)
 {
-	bash->env = copy_envp(envp);
-	if (!bash->env)
-		return (1);
-	bash->exit_status = 0;
-	bash->tokens = NULL;
-	bash->commands = NULL;
-	return (0);
+    ft_memset(bash, 0, sizeof(*bash));
+    bash->env = env_deep_copy(envp);
+    if (!bash->env)
+        return (1);
+    bash->exit_status = 0;
+    bash->tokens = NULL;
+    bash->commands = NULL;
+    return (0);
 }

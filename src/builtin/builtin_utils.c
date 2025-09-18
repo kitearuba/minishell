@@ -12,16 +12,18 @@
 
 #include "../../include/minishell.h"
 
-int	is_valid_identifier(const char *str)
+int	is_valid_identifier(const char *s)
 {
 	int	i;
 
-	if (!str || !ft_isalpha(str[0]))
+	if (!s || !*s)
+		return (0);
+	if (!(ft_isalpha(*s) || *s == '_'))
 		return (0);
 	i = 1;
-	while (str[i])
+	while (s[i])
 	{
-		if (!ft_isalnum(str[i]) && str[i] != '_')
+		if (!(ft_isalnum(s[i]) || s[i] == '_'))
 			return (0);
 		i++;
 	}
