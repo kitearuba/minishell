@@ -62,7 +62,7 @@ static void	parse_and_execute(char *line, t_bash *bash)
 	bash->tokens = tokenize_input(line);
 	if (!bash->tokens)
 		return ;
-	expand_env_vars(bash->tokens, bash);
+	expand_env_vars(&bash->tokens, bash);
 	expand_wildcards(&bash->tokens);
 	bash->commands = parse_tokens(bash->tokens);
 	if (bash->commands)
@@ -123,7 +123,6 @@ void	minishell_loop(t_bash *bash)
 	            continue ;
 	        }
 		}
-		/* Ignore empty or spaces-only lines */
 		if (*line == '\0' || is_only_spaces(line))
 		{
 			free(line);

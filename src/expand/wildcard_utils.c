@@ -43,25 +43,34 @@ void	append_token(t_token **head, t_token **tail, t_token *new)
 }
 
 void	handle_match_loop(DIR *dir, const char *pattern,
-	t_token **head, t_token **tail)
+	t_token **head, t_token **tail, int space_before)
 {
 	struct dirent	*entry;
 	t_token			*tmp;
+	int				first;
+	int				sb;
 
+	first = 1;
 	entry = get_next_entry(dir);
 	while (entry)
 	{
 		if (entry->d_name[0] != '.' && match_pattern(pattern, entry->d_name))
 		{
-			tmp = new_token(WORD, entry->d_name, ft_strlen(entry->d_name), 0);
+			if (first)
+				sb = space_before;
+			else
+				sb = 1;
+			tmp = new_token(WORD, entry->d_name,
+					ft_strlen(entry->d_name), 0, sb);
 			if (tmp)
 				append_token(head, tail, tmp);
+			first = 0;
 		}
 		entry = get_next_entry(dir);
 	}
 }
 
-t_token	*wildcard_match(const char *pattern)
+t_token	*wildcard_match(const char *pattern, int space_before)
 {
 	t_token	*head;
 	t_token	*tail;
@@ -72,7 +81,7 @@ t_token	*wildcard_match(const char *pattern)
 		return (NULL);
 	head = NULL;
 	tail = NULL;
-	handle_match_loop(dir, pattern, &head, &tail);
+	handle_match_loop(dir, pattern, &head, &tail, space_before);
 	closedir(dir);
 	return (head);
 }

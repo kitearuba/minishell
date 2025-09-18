@@ -17,7 +17,7 @@ void	replace_with_matches(t_token **tokens, t_token *prev, t_token **curr)
 	t_token	*matches;
 	t_token	*tail;
 
-	matches = wildcard_match((*curr)->value);
+	matches = wildcard_match((*curr)->value, (*curr)->space_before);
 	if (!matches)
 		return ;
 	tail = matches;

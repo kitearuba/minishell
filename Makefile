@@ -89,10 +89,10 @@ INCLUDES    = -I$(INC_DIR) -I$(LIBFT_DIR)
 all: $(NAME)
 
 $(NAME): $(OBJ) $(LIBFT_A)
-	$(CC) $(CFLAGS) $(OBJ) $(LIBFT_A) $(INCLUDES) -lreadline -o $(NAME)
+	$(CC) $(CFLAGS) $(OBJ) $(LIBFT_A) -I$(INCLUDES) -lreadline -o $(NAME)
 
 $(SRC_DIR)/%.o: $(SRC_DIR)/%.c $(DEPS)
-	$(CC) $(CFLAGS) $(INCLUDES) -c $< -o $@
+	$(CC) $(CFLAGS) -I$(INCLUDES) -c $< -o $@
 
 # Rule to rebuild libft.a
 $(LIBFT_A): $(LIBFT_MAKEFILE) $(LIBFT_SRC) $(LIBFT_H)

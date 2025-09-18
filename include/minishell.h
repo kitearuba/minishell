@@ -49,23 +49,29 @@ void		minishell_loop(t_bash *bash);
 
 /* --- Tokenizer --- */
 t_token		*tokenize_input(const char *input);
-t_token		*new_token(t_token_type type, const char *start,
-				size_t len, int quoted);
+t_token		*new_token(t_token_type type, const char *start, size_t len,
+				int quoted, int space_before);
+size_t		handle_pipe(const char *input, t_token **tokens, size_t i,
+				int space_before);
+size_t		handle_word(const char *input, t_token **tokens, size_t i,
+				int space_before);
+size_t		handle_env_var(const char *input, t_token **tokens, size_t i,
+				int space_before);
+int			handle_quotes(const char *input, t_token **tokens, size_t *i,
+				int space_before);
 void		add_token(t_token **head, t_token *new);
-size_t		handle_word(const char *input, t_token **tokens, size_t i);
-size_t		handle_pipe(const char *input, t_token **tokens, size_t i);
 char		*extract_quoted_token(const char *line, size_t *index);
 
 /* --- Expander --- */
-void		expand_env_vars(t_token *tokens, t_bash *bash);
+void		expand_env_vars(t_token **tokens, t_bash *bash);
 char		*get_env_value(const char *key, char **env);
 char		*append_and_free(char *s1, char *s2);
 void		expand_wildcards(t_token **tokens);
 void		replace_with_matches(t_token **tokens,
 				t_token *prev, t_token **curr);
-t_token		*wildcard_match(const char *pattern);
+t_token		*wildcard_match(const char *pattern, int space_before);
 void		handle_match_loop(DIR *dir, const char *pattern,
-				t_token **head, t_token **tail);
+				t_token **head, t_token **tail,  int space_before);
 
 /* --- Parser --- */
 t_command	*parse_tokens(t_token *tokens);

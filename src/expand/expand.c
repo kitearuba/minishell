@@ -14,102 +14,118 @@
 
 static char	*expand_token_value(t_token *token, t_bash *bash)
 {
-	char	*variable_name;
-	char	*expanded;
+	char	*name;
+	char	*val;
 
-	if (ft_strncmp(token->value, "$?", 2) == 0)
+	if (!token->value || token->value[0] != '$')
+		return (ft_strdup(token->value));
+	if (!ft_strncmp(token->value, "$?", 2))
 		return (ft_itoa(bash->exit_status));
-	variable_name = ft_substr(token->value, 1, ft_strlen(token->value) - 1);
-	if (!variable_name)
+	name = ft_substr(token->value, 1, ft_strlen(token->value) - 1);
+	if (!name)
 		return (NULL);
-	expanded = ft_strdup(get_env_value(variable_name, bash->env));
-	free(variable_name);
-	return (expanded);
+	val = ft_strdup(get_env_value(name, bash->env));
+	free(name);
+	return (val);
 }
 
-static char	*extract_var_value(char **str, t_bash *bash)
+static char	*extract_var_value(char **s, t_bash *bash)
 {
 	int		len;
 	char	*var;
 	char	*val;
 
-	if (**str == '?')
+	if (**s == '?')
 	{
-		(*str)++;
+		(*s)++;
 		return (ft_itoa(bash->exit_status));
 	}
 	len = 0;
-	while ((*str)[len] && (ft_isalnum((*str)[len]) || (*str)[len] == '_'))
+	while ((*s)[len] && (ft_isalnum((*s)[len]) || (*s)[len] == '_'))
 		len++;
-	var = ft_substr(*str, 0, len);
+	var = ft_substr(*s, 0, len);
 	val = ft_strdup(get_env_value(var, bash->env));
 	free(var);
-	*str += len;
+	*s += len;
 	return (val);
 }
 
-static char	*expand_inside_double_quote(const char *str, t_bash *bash)
+static char	*expand_in_double_quotes(const char *str, t_bash *bash)
 {
-	char	*result;
+	char	*res;
 	char	*tmp;
 	char	*val;
 	char	*scan;
-	int		i;
+	int		n;
 
+	res = ft_strdup("");
+	if (!res)
+		return (NULL);
 	scan = (char *)str;
-	result = ft_strdup("");
 	while (*scan)
 	{
-		i = 0;
-		while (scan[i] && scan[i] != '$')
-			i++;
-		tmp = ft_substr(scan, 0, i);
-		result = append_and_free(result, tmp);
-		scan += i;
+		n = 0;
+		while (scan[n] && scan[n] != '$')
+			n++;
+		tmp = ft_substr(scan, 0, n);
+		res = append_and_free(res, tmp);
+		scan += n;
 		if (*scan == '$')
 		{
 			scan++;
 			val = extract_var_value(&scan, bash);
-			result = append_and_free(result, val);
+			res = append_and_free(res, val);
 		}
 	}
-	return (result);
+	return (res);
 }
 
-static void	expand_token_if_needed(t_token *tok, t_bash *bash)
+static void	expand_one(t_token **head, t_token **prev, t_token **cur, t_bash *b)
 {
-	char	*expanded;
+	char	*exp;
 
-	if (tok->type == ENV_VAR)
+	if ((*cur)->type == ENV_VAR)
 	{
-		expanded = expand_token_value(tok, bash);
-		if (expanded)
+		exp = expand_token_value(*cur, b);
+		if (!exp)
+			exp = ft_strdup("");
+		if ((*cur)->quoted == 0 && exp[0] == '\0')
 		{
-			free(tok->value);
-			tok->value = expanded;
-			tok->type = WORD;
+			if (*prev)
+				(*prev)->next = (*cur)->next;
+			else
+				*head = (*cur)->next;
+			free((*cur)->value);
+			free(*cur);
+			*cur = (*prev) ? (*prev)->next : *head;
+			free(exp);
+			return ;
+		}
+		free((*cur)->value);
+		(*cur)->value = exp;
+		(*cur)->type = WORD;
+	}
+	else if ((*cur)->quoted == 2)
+	{
+		exp = expand_in_double_quotes((*cur)->value, b);
+		if (exp)
+		{
+			free((*cur)->value);
+			(*cur)->value = exp;
+			(*cur)->type = WORD;
 		}
 	}
-	else if (tok->type == DOUBLE_QUOTE)
-	{
-		expanded = expand_inside_double_quote(tok->value, bash);
-		if (expanded)
-		{
-			free(tok->value);
-			tok->value = expanded;
-			tok->type = WORD;
-		}
-	}
+	*prev = *cur;
+	*cur = (*cur)->next;
 }
 
-void	expand_env_vars(t_token *tokens, t_bash *bash)
+void	expand_env_vars(t_token **tokens, t_bash *bash)
 {
-	t_token	*current;
+	t_token	*prev;
+	t_token	*cur;
 
-	current = tokens;
-	while (current)
-	{
-		expand_token_if_needed(current, bash);
-		current = current->next;
-	}
+	prev = NULL;
+	cur = *tokens;
+	while (cur)
+		expand_one(tokens, &prev, &cur, bash);
 }

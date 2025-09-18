@@ -44,6 +44,7 @@ typedef struct s_token
 	char				*value;
 	struct s_token		*next;
 	int					quoted;
+	int					space_before;
 }	t_token;
 
 typedef struct s_redirection

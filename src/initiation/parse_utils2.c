@@ -14,8 +14,20 @@
 
 void	add_token_argument(t_token *tok, t_list **args)
 {
+	t_list	*last;
+	char	*old;
+	char	*joined;
 	char	*dup;
 
+	if (*args && tok->space_before == 0)
+	{
+		last = ft_lstlast(*args);
+		old = (char *)last->content;
+		joined = ft_strjoin(old, tok->value);
+		free(old);
+		last->content = joined;
+		return ;
+	}
 	dup = ft_strdup(tok->value);
 	ft_lstadd_back(args, ft_lstnew(dup));
 }
