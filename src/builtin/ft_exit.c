@@ -10,52 +10,91 @@
 /*                                                                            */
 /* ************************************************************************** */
 
+/* ************************************************************************** */
+/*                                                                            */
+/*   ft_exit.c                                                                 */
+/*                                                                            */
+/*   Behavior (bash-compatible):                                               */
+/*   - exit           -> exit with current bash->exit_status                   */
+/*   - exit <num>     -> exit with (unsigned char)num (wrap 0..255)            */
+/*   - exit <bad>     -> print error, exit with 2                              */
+/*   - exit <n> <m>   -> print "too many arguments", DO NOT exit, return 1     */
+/*                                                                            */
+/*   Notes for 42: keep helpers tiny, no dynamic alloc here.                   */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "../../include/minishell.h"
 
-static int	is_numeric(const char *str)
+static int	is_num_str(const char *s)
 {
 	int	i;
 
+	if (!s || !*s)
+		return (0);
 	i = 0;
-	if (!str || !*str)
-		return (0);
-	if (str[i] == '-' || str[i] == '+')
+	if (s[i] == '+' || s[i] == '-')
 		i++;
-	if (!ft_isdigit(str[i]))
+	if (!s[i])
 		return (0);
-	while (str[i])
+	while (s[i])
 	{
-		if (!ft_isdigit(str[i]))
+		if (!ft_isdigit(s[i]))
 			return (0);
 		i++;
 	}
 	return (1);
 }
 
-void	ft_exit(char **argv, t_bash *bash)
+static long long	atoll_s(const char *s)
 {
-	long long	code;
-	int			arg_count;
+	long long	sign;
+	long long	res;
 
-	arg_count = 0;
-	while (argv[arg_count])
-		arg_count++;
-	ft_printf_fd(STDOUT_FILENO, "exit\n");
-	if (arg_count == 1)
+	sign = 1;
+	res = 0;
+	if (*s == '+' || *s == '-')
+	{
+		if (*s == '-')
+			sign = -1;
+		s++;
+	}
+	while (*s >= '0' && *s <= '9')
+	{
+		res = res * 10 + (*s - '0');
+		s++;
+	}
+	return (res * sign);
+}
+
+int	ft_exit(char **argv, t_bash *bash)
+{
+	int			ac;
+	long long	v;
+
+	ac = 0;
+	while (argv[ac])
+		ac++;
+	if (ac == 1)
+	{
+		ft_printf_fd(STDOUT_FILENO, "exit\n");
 		free_all_and_exit(bash, bash->exit_status);
-	if (!is_numeric(argv[1]))
+	}
+	if (!is_num_str(argv[1]))
 	{
 		ft_printf_fd(STDERR_FILENO,
 			"minishell: exit: %s: numeric argument required\n", argv[1]);
-		free_all_and_exit(bash, 255);
+		ft_printf_fd(STDOUT_FILENO, "exit\n");
+		free_all_and_exit(bash, 2);
 	}
-	if (arg_count > 2)
+	if (ac > 2)
 	{
-		ft_printf_fd(STDERR_FILENO,
-			"minishell: exit: too many arguments\n");
+		ft_printf_fd(STDERR_FILENO, "minishell: exit: too many arguments\n");
 		bash->exit_status = 1;
-		return ;
+		return (1); /* stay in shell */
 	}
-	code = ft_atoll(argv[1]);
-	free_all_and_exit(bash, (unsigned char)code);
+	v = atoll_s(argv[1]);
+	ft_printf_fd(STDOUT_FILENO, "exit\n");
+	free_all_and_exit(bash, (unsigned char)v);
+	return (0);
 }

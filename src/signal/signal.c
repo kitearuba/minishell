@@ -12,31 +12,33 @@
 
 #include "../../include/minishell.h"
 
+volatile sig_atomic_t	g_sigint_flag = 0;
 volatile sig_atomic_t	g_heredoc_interrupted = 0;
 
 static void	handle_sigint(int signum)
 {
-	(void)signum;
-	write(1, "\n", 1);
-	rl_on_new_line();
-	rl_replace_line("", 0);
-	rl_redisplay();
-}
-
-static void	handle_sigquit(int signum)
-{
-	(void)signum;
-	write(1, "\b\b  \b\b", 6);
+    (void)signum;
+    g_sigint_flag = 1;
+    write(1, "\n", 1);
+    rl_on_new_line();
+    rl_replace_line("", 0);
+    rl_redisplay();
 }
 
 void	setup_signal_handlers(void)
 {
-	signal(SIGINT, handle_sigint);
-	signal(SIGQUIT, handle_sigquit);
+    struct sigaction sa;
+
+    ft_bzero(&sa, sizeof(sa));
+    sa.sa_handler = handle_sigint;
+    sigemptyset(&sa.sa_mask);
+    sa.sa_flags = SA_RESTART;
+    sigaction(SIGINT, &sa, 0);
+    signal(SIGQUIT, SIG_IGN);
 }
 
 void	setup_child_signals(void)
 {
-	signal(SIGINT, SIG_DFL);
-	signal(SIGQUIT, SIG_DFL);
+    signal(SIGINT, SIG_DFL);
+    signal(SIGQUIT, SIG_DFL);
 }
