@@ -103,6 +103,7 @@ char		*get_cmd_path(char *cmd, char **envp);
 
 /* --- Environment --- */
 char		*ft_getenv(char **envp, char *key);
+int			env_set(t_bash *bash, const char *key, const char *val);
 
 /* --- Utilities --- */
 void		free_2d_array(char **arr);
