@@ -6,7 +6,7 @@
 /*   By: chrrodri <chrrodri@student.42barcelona.co  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/20 16:21:19 by chrrodri          #+#    #+#             */
-/*   Updated: 2025/09/19 12:25:54 by chrrodri         ###   ########.fr       */
+/*   Updated: 2025/09/19 13:23:33 by chrrodri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,6 +26,7 @@
 # include <dirent.h>
 # include <readline/readline.h>
 # include <readline/history.h>
+# include <errno.h>
 # include "../libft/include/libft.h"
 # include "builtin.h"
 # include "struct.h"

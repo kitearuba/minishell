@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   ft_export.c                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: chrrodri <chrrodri@student.42barcelona.co> +#+  +:+       +#+        */
+/*   By: chrrodri <chrrodri@student.42barcelona.co  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2025/05/18 23:25:00 by chrrodri          #+#    #+#             */
-/*   Updated: 2025/08/07 04:40:00 by chrrodri         ###   ########.fr       */
+/*   Created: 2025/05/05 10:43:48 by chrrodri          #+#    #+#             */
+/*   Updated: 2025/09/19 13:01:30 by chrrodri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -98,7 +98,8 @@ static int	handle_export_arg(char *arg, t_bash *bash)
 	}
 	else if (update_or_add_env(&bash->env, arg) != 0)
 	{
-		ft_putendl_fd("minishell: export: failed to update env", STDERR_FILENO);
+		ft_putendl_fd("minishell: export: failed to update env",
+			STDERR_FILENO);
 		free(name);
 		return (1);
 	}
