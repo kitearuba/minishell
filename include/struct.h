@@ -1,12 +1,12 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   struct.h                                         :+:      :+:    :+:    */
+/*   struct.h                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: chrrodri <chrrodri@student.42barcelona.co  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/20 16:21:19 by chrrodri          #+#    #+#             */
-/*   Updated: 2025/08/01 16:35:00 by chrrodri         ###   ########.fr       */
+/*   Updated: 2025/09/19 12:22:12 by chrrodri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -51,7 +51,7 @@ typedef struct s_redirection
 {
 	int						type;
 	char					*filename;
-    int						quoted;
+	int						quoted;
 	struct s_redirection	*next;
 }	t_redirection;
 

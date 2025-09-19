@@ -6,7 +6,7 @@
 /*   By: chrrodri <chrrodri@student.42barcelona.co  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/20 16:21:19 by chrrodri          #+#    #+#             */
-/*   Updated: 2025/08/08 16:00:00 by chrrodri         ###   ########.fr       */
+/*   Updated: 2025/09/19 12:25:54 by chrrodri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -37,7 +37,7 @@
 /* ========================== GLOBAL VARIABLE ============================ */
 
 extern volatile sig_atomic_t	g_heredoc_interrupted;
-extern volatile sig_atomic_t g_sigint_flag;
+extern volatile sig_atomic_t	g_sigint_flag;
 
 /* ======================== FUNCTION PROTOTYPES ========================== */
 
@@ -71,7 +71,7 @@ void		replace_with_matches(t_token **tokens,
 				t_token *prev, t_token **curr);
 t_token		*wildcard_match(const char *pattern, int space_before);
 void		handle_match_loop(DIR *dir, const char *pattern,
-				t_token **head, t_token **tail,  int space_before);
+				t_token **head, t_token **tail, int space_before);
 
 /* --- Parser --- */
 t_command	*parse_tokens(t_token *tokens);
@@ -88,7 +88,8 @@ t_command	*handle_parse_error(t_command *head, t_command *current,
 				t_list *args);
 int			check_commandless_redirection(t_command *head);
 int			handle_parse_redirection(t_token *tok, t_command **current);
-void		add_redirection(t_command *cmd, int type, char *filename, int quoted);
+void		add_redirection(t_command *cmd, int type, char *filename,
+				int quoted);
 void		add_token_argument(t_token *tok, t_list **args);
 int			handle_redirection(t_token *tok, t_command **current,
 				t_list **args);
@@ -102,8 +103,8 @@ int			run_builtin(char **argv, t_bash *bash);
 void		execve_cmd(char **argv, char **env, t_bash *bash);
 int			apply_redirections(t_redirection *redir, t_bash *bash);
 int			handle_heredoc(t_redirection *redir, t_bash *bash);
-char	    *hd_expand_key(const char *s, size_t *i, t_bash *bash);
-char	    *hd_expand_line(const char *s, t_bash *bash);
+char		*hd_expand_key(const char *s, size_t *i, t_bash *bash);
+char		*hd_expand_line(const char *s, t_bash *bash);
 int			exec_external(char **args, t_bash *bash);
 
 /* --- Command Path --- */

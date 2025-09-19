@@ -1,12 +1,12 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   builtin.h                                         :+:      :+:    :+:    */
+/*   builtin.h                                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: chrrodri <chrrodri@student.42barcelona.co  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/20 16:21:19 by chrrodri          #+#    #+#             */
-/*   Updated: 2025/08/01 16:30:00 by chrrodri         ###   ########.fr       */
+/*   Updated: 2025/09/19 12:21:39 by chrrodri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,7 +22,7 @@ int		ft_export(char **argv, t_bash *bash);
 int		append_env_var(char ***env, const char *new_var);
 int		ft_unset(char **argv, t_bash *bash);
 int		ft_env(char **argv, t_bash *bash);
-int 	ft_exit(char **argv, t_bash *bash);
+int		ft_exit(char **argv, t_bash *bash);
 int		is_valid_identifier(const char *str);
 char	**copy_env(char **env);
 
