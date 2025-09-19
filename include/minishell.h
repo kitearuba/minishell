@@ -52,7 +52,7 @@ void		finalize_cmd(t_command **head, t_command **current, t_list **args);
 /* --- Tokenizer --- */
 t_token		*tokenize_input(const char *input);
 t_token		*new_token(t_token_type type, const char *start, size_t len,
-				int quoted);
+				int quoted, int space_before);
 size_t		handle_pipe(const char *input, t_token **tokens, size_t i,
 				int space_before);
 size_t		handle_word(const char *input, t_token **tokens, size_t i,
