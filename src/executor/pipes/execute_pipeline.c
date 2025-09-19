@@ -6,7 +6,7 @@
 /*   By: chrrodri <chrrodri@student.42barcelona.co  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/20 14:00:00 by chrrodri          #+#    #+#             */
-/*   Updated: 2025/08/08 03:15:00 by chrrodri         ###   ########.fr       */
+/*   Updated: 2025/09/19 14:28:55 by chrrodri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,8 +25,6 @@ static void	child_process(
 	if (output_fd != STDOUT_FILENO)
 		close(output_fd);
 	setup_child_signals();
-
-	/* child: apply redirs; on failure, exit with that status (preserve 130) */
 	st = 0;
 	if (cmd->redirection)
 	{
@@ -76,13 +74,9 @@ int	execute_pipeline(t_command *cmd, t_bash *bash)
 		child_process(cmd, input_fd, STDOUT_FILENO, bash);
 	if (input_fd != STDIN_FILENO)
 		close(input_fd);
-
-	/* collect last, then reap the rest */
 	waitpid(last_pid, &status, 0);
 	while (wait(NULL) > 0)
 		;
-
-	/* set $? correctly (handle signals like SIGINT -> 130) */
 	if (WIFSIGNALED(status))
 		bash->exit_status = 128 + WTERMSIG(status);
 	else if (WIFEXITED(status))

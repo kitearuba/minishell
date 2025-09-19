@@ -113,10 +113,10 @@ void	minishell_loop(t_bash *bash)
 			ft_printf("exit\n");
 			free_all_and_exit(bash, bash->exit_status);
 		}
-	    if (g_sigint_flag)
+	    if (*get_sigint_flag())
 		{
 			bash->exit_status = 130;
-			g_sigint_flag = 0;
+	    	*get_sigint_flag() = 0;
 	        if (line[0] == '\0')
 	        {
 	            free(line);

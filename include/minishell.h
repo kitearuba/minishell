@@ -38,7 +38,6 @@
 /* ========================== GLOBAL VARIABLE ============================ */
 
 extern volatile sig_atomic_t	g_heredoc_interrupted;
-extern volatile sig_atomic_t	g_sigint_flag;
 
 /* ======================== FUNCTION PROTOTYPES ========================== */
 
@@ -130,6 +129,7 @@ int			fork_and_exec(t_command *cmd, int input_fd,
 /* --- Signal --- */
 void		setup_signal_handlers(void);
 void		setup_child_signals(void);
+volatile sig_atomic_t *get_sigint_flag(void);
 
 /* --- Wildcard Expansion --- */
 char		**expand_token_if_wildcard(char *token);
