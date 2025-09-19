@@ -6,31 +6,9 @@
 /*   By: chrrodri <chrrodri@student.42barcelona.co  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/19 17:59:43 by chrrodri          #+#    #+#             */
-/*   Updated: 2025/08/01 16:40:00 by chrrodri         ###   ########.fr       */
+/*   Updated: 2025/09/19 15:17:08 by chrrodri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
-#include "../../include/minishell.h"
-
-/* ************************************************************************** */
-/*                                                                            */
-/*                                                        :::      ::::::::   */
-/*   execute_minishell.c                                :+:      :+:    :+:   */
-/*                                                    +:+ +:+         +:+     */
-/*   By: chrrodri <chrrodri@student.42barcelona.co> +#+  +:+       +#+        */
-/*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2025/05/19 17:59:43 by chrrodri          #+#    #+#             */
-/*   Updated: 2025/09/18 02:15:00 by chrrodri         ###   ########.fr       */
-/*                                                                            */
-/* ************************************************************************** */
-
-/*
-** Prompt loop rules (bash-like):
-** - Ctrl-C at prompt: print newline, clear line, redraw prompt; set $?=130;
-**   do not execute or add history for that empty line.
-** - Ctrl-\ at prompt: ignored.
-** - Ctrl-D: exit minishell with current exit_status (print "exit\n").
-** - Empty/space-only line: do nothing.
-*/
 
 #include "../../include/minishell.h"
 
@@ -38,22 +16,6 @@ int	exit_failure(t_bash *bash)
 {
 	write(2, "minishell: exit\n", 16);
 	free_2d_array(bash->env);
-	return (1);
-}
-
-static int	is_only_spaces(const char *s)
-{
-	int	i;
-
-	if (!s)
-		return (1);
-	i = 0;
-	while (s[i])
-	{
-		if (s[i] != ' ' && s[i] != '\t')
-			return (0);
-		i++;
-	}
 	return (1);
 }
 
@@ -67,8 +29,6 @@ static void	parse_and_execute(char *line, t_bash *bash)
 	bash->commands = parse_tokens(bash->tokens);
 	if (bash->commands)
 	{
-		/* execute_command() should map child status:
-		** if (WIFSIGNALED) status = 128 + signal; else WEXITSTATUS */
 		bash->exit_status = execute_command(bash->commands, bash);
 		free_commands(bash->commands);
 		bash->commands = NULL;
@@ -94,6 +54,22 @@ void	process_input(char *line, t_bash *bash)
 	parse_and_execute(line, bash);
 }
 
+/* Handle SIGINT-at-prompt and empty/space-only lines */
+static void	handle_line(char *line, t_bash *bash)
+{
+	if (*get_sigint_flag())
+	{
+		bash->exit_status = 130;
+		*get_sigint_flag() = 0;
+		if (line[0] == '\0')
+			return ;
+	}
+	if (*line == '\0' || is_only_spaces(line))
+		return ;
+	add_history(line);
+	process_input(line, bash);
+}
+
 void	minishell_loop(t_bash *bash)
 {
 	char	*line;
@@ -113,23 +89,7 @@ void	minishell_loop(t_bash *bash)
 			ft_printf("exit\n");
 			free_all_and_exit(bash, bash->exit_status);
 		}
-	    if (*get_sigint_flag())
-		{
-			bash->exit_status = 130;
-	    	*get_sigint_flag() = 0;
-	        if (line[0] == '\0')
-	        {
-	            free(line);
-	            continue ;
-	        }
-		}
-		if (*line == '\0' || is_only_spaces(line))
-		{
-			free(line);
-			continue ;
-		}
-		add_history(line);
-		process_input(line, bash);
+		handle_line(line, bash);
 		free(line);
 	}
 }

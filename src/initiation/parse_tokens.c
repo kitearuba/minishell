@@ -6,97 +6,86 @@
 /*   By: chrrodri <chrrodri@student.42barcelona.co  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/25 14:15:32 by chrrodri          #+#    #+#             */
-/*   Updated: 2025/07/21 19:45:00 by chrrodri         ###   ########.fr       */
+/*   Updated: 2025/09/19 16:27:22 by chrrodri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../../include/minishell.h"
 
-static char	**list_to_argv(t_list *args)
+static int	begin_command_if_needed(t_token *tok, t_command **current,
+		t_list **args)
 {
-	char	**argv;
-	t_list	*temp;
-	int		count;
-	int		i;
-
-	count = 0;
-	i = 0;
-	temp = args;
-	while (temp)
+	if (!*current)
 	{
-		count++;
-		temp = temp->next;
+		if (check_initial_errors(tok))
+		{
+			ft_lstclear(args, free);
+			return (1);
+		}
+		*current = new_command();
+		if (!*current)
+		{
+			ft_lstclear(args, free);
+			return (1);
+		}
 	}
-	argv = malloc(sizeof(char *) * (count + 1));
-	if (!argv)
-		return (NULL);
-	temp = args;
-	while (temp)
-	{
-		argv[i++] = temp->content;
-		temp = temp->next;
-	}
-	argv[i] = NULL;
-	return (argv);
+	return (0);
 }
 
-static void	finalize_cmd(t_command **head, t_command **current, t_list **args)
+static int	process_token(t_token **ptok, t_command **head,
+		t_command **current, t_list **args)
 {
-	t_list	*tmp;
-	t_list	*next;
+	t_token	*tok;
 
-	if (!*current)
-		return ;
-	(*current)->argv = list_to_argv(*args);
-	tmp = *args;
-	while (tmp)
+	tok = *ptok;
+	if (tok->type >= REDIRECT_IN && tok->type <= HEREDOC)
 	{
-		next = tmp->next;
-		free(tmp);
-		tmp = next;
+		if (handle_parse_redirection(tok, current))
+		{
+			ft_lstclear(args, free);
+			return (1);
+		}
+		if (!tok->next)
+		{
+			ft_lstclear(args, free);
+			return (1);
+		}
+		*ptok = tok->next->next;
+		return (2);
 	}
-	*args = NULL;
-	if (!*head)
-		*head = *current;
-	else
-		last_command(*head)->next = *current;
-	*current = NULL;
+	if (handle_token_type(tok, current, args))
+		return (1);
+	if (tok->type == PIPE)
+		finalize_cmd(head, current, args);
+	*ptok = tok->next;
+	return (0);
 }
 
 static int	parse_loop(t_command **head, t_command **current,
-    t_list **args, t_token *tok)
+		t_list **args, t_token *tok)
 {
-    while (tok)
-    {
-        if (!*current)
-        {
-            if (check_initial_errors(tok))
-                return (ft_lstclear(args, free), 1);
-            *current = new_command();
-        }
-        if (check_consecutive_pipes(tok, current))
-            return (ft_lstclear(args, free), 1);
+	int	st;
 
-        if (tok->type >= REDIRECT_IN && tok->type <= HEREDOC)
-        {
-            if (handle_parse_redirection(tok, current))
-                return (ft_lstclear(args, free), 1);
-            if (!tok->next)
-                return (ft_lstclear(args, free), 1);
-            tok = tok->next->next;
-            continue ;
-        }
-        if (handle_token_type(tok, current, args))
-            return (1);
-        if (tok->type == PIPE)
-            finalize_cmd(head, current, args);
-        tok = tok->next;
-    }
-    return (0);
+	while (tok)
+	{
+		if (begin_command_if_needed(tok, current, args))
+			return (1);
+		if (check_consecutive_pipes(tok, current))
+		{
+			ft_lstclear(args, free);
+			return (1);
+		}
+		st = process_token(&tok, head, current, args);
+		if (st == 1)
+			return (1);
+		if (st == 2)
+			continue ;
+	}
+	return (0);
 }
 
 static t_command	*check_parse_errors(t_command *head,
-	t_command *current, t_list *args, t_token *tokens)
+		t_command *current, t_list *args, t_token *tokens)
 {
 	if (current)
 		finalize_cmd(&head, &current, &args);

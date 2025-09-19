@@ -6,7 +6,7 @@
 /*   By: chrrodri <chrrodri@student.42barcelona.co  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/20 15:15:58 by chrrodri          #+#    #+#             */
-/*   Updated: 2025/05/20 16:45:41 by chrrodri         ###   ########.fr       */
+/*   Updated: 2025/09/19 16:08:20 by bsamy            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,26 +14,15 @@
 
 static void	print_cmd_not_found(const char *cmd, t_bash *bash)
 {
-    char	*path_val;
+	char	*path_val;
 
-    path_val = ft_getenv(bash->env, "PATH");
-    if (!path_val || !*path_val)
-        ft_printf_fd(STDERR_FILENO,
-            "minishell: %s: No such file or directory\n", cmd);
-    else
-        ft_printf_fd(STDERR_FILENO,
-            "minishell: %s: command not found\n", cmd);
-}
-
-static void	parent_ignore_signals(void)
-{
-	signal(SIGINT, SIG_IGN);
-	signal(SIGQUIT, SIG_IGN);
-}
-
-static void	parent_restore_prompt_signals(void)
-{
-	setup_signal_handlers();
+	path_val = ft_getenv(bash->env, "PATH");
+	if (!path_val || !*path_val)
+		ft_printf_fd(STDERR_FILENO,
+			"minishell: %s: No such file or directory\n", cmd);
+	else
+		ft_printf_fd(STDERR_FILENO,
+			"minishell: %s: command not found\n", cmd);
 }
 
 static int	wait_and_set_status(pid_t pid, t_bash *bash)

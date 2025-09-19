@@ -37,3 +37,20 @@ char	*append_and_free(char *s1, char *s2)
 	free(s2);
 	return (joined);
 }
+
+char	*expand_token_value(t_token *token, t_bash *bash)
+{
+	char	*name;
+	char	*val;
+
+	if (!token->value || token->value[0] != '$')
+		return (ft_strdup(token->value));
+	if (!ft_strncmp(token->value, "$?", 2))
+		return (ft_itoa(bash->exit_status));
+	name = ft_substr(token->value, 1, ft_strlen(token->value) - 1);
+	if (!name)
+		return (NULL);
+	val = ft_strdup(get_env_value(name, bash->env));
+	free(name);
+	return (val);
+}

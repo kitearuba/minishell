@@ -6,7 +6,7 @@
 /*   By: chrrodri <chrrodri@student.42barcelona.co  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/18 14:15:32 by chrrodri          #+#    #+#             */
-/*   Updated: 2025/07/18 20:45:00 by chrrodri         ###   ########.fr       */
+/*   Updated: 2025/09/19 15:41:41 by chrrodri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -76,7 +76,8 @@ size_t	handle_env_var(const char *in, t_token **toks, size_t i, int space)
 		add_token(toks, new_token(WORD, &in[i - 1], 1, 0, space));
 		return (start);
 	}
-	add_token(toks, new_token(ENV_VAR, &in[start - 1], i - start + 1, 0, space));
+	add_token(toks, new_token(ENV_VAR, &in[start - 1], i - start + 1, 0,
+			space));
 	return (i);
 }
 

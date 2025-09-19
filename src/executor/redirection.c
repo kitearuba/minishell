@@ -6,7 +6,7 @@
 /*   By: chrrodri <chrrodri@student.42barcelona.co  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/21 14:00:00 by chrrodri          #+#    #+#             */
-/*   Updated: 2025/08/08 03:15:00 by chrrodri         ###   ########.fr       */
+/*   Updated: 2025/09/19 16:06:17 by bsamy            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -41,29 +41,28 @@ static int	open_fd_for_redir(t_redirection *r)
 
 static int	heredoc_to_stdin(t_redirection *r, t_bash *bash)
 {
-    int	fd;
+	int	fd;
 
-    fd = handle_heredoc(r, bash);
-    if (fd < 0)
-    {
-        if (bash->exit_status == 130)
-            return (130);
-        if (bash->exit_status == 0)
-            bash->exit_status = 1;
-        return (1);
-    }
-    if (dup2(fd, STDIN_FILENO) < 0)
-    {
-        close(fd);
-        perror("dup2");
-        if (bash->exit_status == 0)
-            bash->exit_status = 1;
-        return (1);
-    }
-    close(fd);
-    return (0);
+	fd = handle_heredoc(r, bash);
+	if (fd < 0)
+	{
+		if (bash->exit_status == 130)
+			return (130);
+		if (bash->exit_status == 0)
+			bash->exit_status = 1;
+		return (1);
+	}
+	if (dup2(fd, STDIN_FILENO) < 0)
+	{
+		close(fd);
+		perror("dup2");
+		if (bash->exit_status == 0)
+			bash->exit_status = 1;
+		return (1);
+	}
+	close(fd);
+	return (0);
 }
-
 
 int	apply_redirections(t_redirection *r, t_bash *bash)
 {

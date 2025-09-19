@@ -6,7 +6,7 @@
 /*   By: chrrodri <chrrodri@student.42barcelona.co  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/20 14:00:00 by chrrodri          #+#    #+#             */
-/*   Updated: 2025/09/19 14:28:55 by chrrodri         ###   ########.fr       */
+/*   Updated: 2025/09/19 16:37:45 by bsamy            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -53,12 +53,27 @@ static void	pipe_child(
 	*input_fd = pipefd[0];
 }
 
+static int	wait_for_pipeline(pid_t last_pid, t_bash *bash)
+{
+	int	status;
+
+	waitpid(last_pid, &status, 0);
+	while (wait(NULL) > 0)
+		;
+	if (WIFSIGNALED(status))
+		bash->exit_status = 128 + WTERMSIG(status);
+	else if (WIFEXITED(status))
+		bash->exit_status = WEXITSTATUS(status);
+	else
+		bash->exit_status = 1;
+	return (bash->exit_status);
+}
+
 int	execute_pipeline(t_command *cmd, t_bash *bash)
 {
 	int		pipefd[2];
 	int		input_fd;
 	pid_t	last_pid;
-	int		status;
 
 	input_fd = STDIN_FILENO;
 	last_pid = -1;
@@ -74,14 +89,5 @@ int	execute_pipeline(t_command *cmd, t_bash *bash)
 		child_process(cmd, input_fd, STDOUT_FILENO, bash);
 	if (input_fd != STDIN_FILENO)
 		close(input_fd);
-	waitpid(last_pid, &status, 0);
-	while (wait(NULL) > 0)
-		;
-	if (WIFSIGNALED(status))
-		bash->exit_status = 128 + WTERMSIG(status);
-	else if (WIFEXITED(status))
-		bash->exit_status = WEXITSTATUS(status);
-	else
-		bash->exit_status = 1;
-	return (bash->exit_status);
+	return (wait_for_pipeline(last_pid, bash));
 }
