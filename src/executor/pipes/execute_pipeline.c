@@ -15,6 +15,8 @@
 static void	child_process(
 	t_command *cmd, int input_fd, int output_fd, t_bash *bash)
 {
+	int	st;
+
 	if (dup2(input_fd, STDIN_FILENO) == -1
 		|| dup2(output_fd, STDOUT_FILENO) == -1)
 		free_all_and_exit(bash, 1);
@@ -23,8 +25,15 @@ static void	child_process(
 	if (output_fd != STDOUT_FILENO)
 		close(output_fd);
 	setup_child_signals();
-	if (apply_redirections(cmd->redirection, bash))
-		free_all_and_exit(bash, 1);
+
+	/* child: apply redirs; on failure, exit with that status (preserve 130) */
+	st = 0;
+	if (cmd->redirection)
+	{
+		st = apply_redirections(cmd->redirection, bash);
+		if (st != 0)
+			free_all_and_exit(bash, st);
+	}
 	execve_cmd(cmd->argv, bash->env, bash);
 }
 
@@ -67,9 +76,18 @@ int	execute_pipeline(t_command *cmd, t_bash *bash)
 		child_process(cmd, input_fd, STDOUT_FILENO, bash);
 	if (input_fd != STDIN_FILENO)
 		close(input_fd);
+
+	/* collect last, then reap the rest */
 	waitpid(last_pid, &status, 0);
 	while (wait(NULL) > 0)
 		;
-	bash->exit_status = WEXITSTATUS(status);
+
+	/* set $? correctly (handle signals like SIGINT -> 130) */
+	if (WIFSIGNALED(status))
+		bash->exit_status = 128 + WTERMSIG(status);
+	else if (WIFEXITED(status))
+		bash->exit_status = WEXITSTATUS(status);
+	else
+		bash->exit_status = 1;
 	return (bash->exit_status);
 }

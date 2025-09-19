@@ -12,80 +12,101 @@
 
 #include "../../include/minishell.h"
 
-static void	heredoc_sigint(int signum)
+static void	hd_parent_signals(int enable)
 {
-	(void)signum;
-	g_heredoc_interrupted = 1;
-	close(STDIN_FILENO);
+	if (enable == 0)
+	{
+		signal(SIGINT, SIG_IGN);
+		signal(SIGQUIT, SIG_IGN);
+	}
+	else
+	{
+		/* restore prompt-time handlers */
+		setup_signal_handlers();
+	}
 }
 
-static void	setup_heredoc_signals(struct sigaction *old)
-{
-	struct sigaction	new;
-
-	new.sa_handler = heredoc_sigint;
-	sigemptyset(&new.sa_mask);
-	new.sa_flags = 0;
-	sigaction(SIGINT, &new, old);
-}
-
-static void	read_heredoc_input(int write_fd, const char *limiter)
+static void	hd_read_loop(int wfd, const char *lim, int quoted, t_bash *bash)
 {
 	char	*line;
+	char	*exp;
 
 	while (1)
 	{
 		line = readline("> ");
-		if (!line || g_heredoc_interrupted)
+		if (!line)
 			break ;
-		if (ft_strcmp(line, limiter) == 0)
+		if (ft_strcmp(line, lim) == 0)
 		{
 			free(line);
 			break ;
 		}
-		ft_putstr_fd(line, write_fd);
-		ft_putchar_fd('\n', write_fd);
+		if (!quoted)
+		{
+			exp = hd_expand_line(line, bash);
+			free(line);
+			line = exp;
+			if (!line)
+				break ;
+		}
+		write(wfd, line, ft_strlen(line));
+		write(wfd, "\n", 1);
 		free(line);
 	}
 }
 
-static int	fork_and_handle(int *pipefd, t_redirection *redir)
+static pid_t	hd_spawn(int *pipefd, const char *lim, int quoted, t_bash *bash)
 {
-	struct sigaction	old;
-	pid_t				pid;
+	pid_t	pid;
 
 	pid = fork();
 	if (pid == -1)
-		return (perror("fork"), -1);
+		return (-1);
 	if (pid == 0)
 	{
+		signal(SIGINT, SIG_DFL);
+		signal(SIGQUIT, SIG_IGN);
 		close(pipefd[0]);
-		setup_heredoc_signals(&old);
-		read_heredoc_input(pipefd[1], redir->filename);
+		hd_read_loop(pipefd[1], lim, quoted, bash);
 		close(pipefd[1]);
-		if (g_heredoc_interrupted)
-			exit(1);
-		exit(0);
+		_exit(0);
 	}
 	return (pid);
 }
 
-int	handle_heredoc(t_redirection *redir)
+int	handle_heredoc(t_redirection *redir, t_bash *bash)
 {
 	int		pipefd[2];
 	int		status;
 	pid_t	pid;
 
-	if (pipe(pipefd) == -1)
-		return (perror("pipe"), -1);
-	pid = fork_and_handle(pipefd, redir);
-	if (pid < 0)
+	if (!redir || !redir->filename)
 		return (-1);
-	close(pipefd[1]);
-	waitpid(pid, &status, 0);
-	if (WIFSIGNALED(status) || WEXITSTATUS(status) != 0)
+	if (pipe(pipefd) == -1)
+		return (-1);
+    hd_parent_signals(0);
+	pid = hd_spawn(pipefd, redir->filename, redir->quoted, bash);
+	if (pid < 0)
 	{
 		close(pipefd[0]);
+		close(pipefd[1]);
+		hd_parent_signals(1);
+		return (-1);
+	}
+	close(pipefd[1]);
+	waitpid(pid, &status, 0);
+    hd_parent_signals(1);
+    if (WIFSIGNALED(status) && WTERMSIG(status) == SIGINT)
+	{
+		write(1, "\n", 1);
+		close(pipefd[0]);
+		bash->exit_status = 130;
+		return (-1);
+	}
+	if (WIFSIGNALED(status))
+	{
+		close(pipefd[0]);
+		bash->exit_status = 1;
 		return (-1);
 	}
 	return (pipefd[0]);

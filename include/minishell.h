@@ -88,7 +88,7 @@ t_command	*handle_parse_error(t_command *head, t_command *current,
 				t_list *args);
 int			check_commandless_redirection(t_command *head);
 int			handle_parse_redirection(t_token *tok, t_command **current);
-void		add_redirection(t_command *cmd, int type, char *filename);
+void		add_redirection(t_command *cmd, int type, char *filename, int quoted);
 void		add_token_argument(t_token *tok, t_list **args);
 int			handle_redirection(t_token *tok, t_command **current,
 				t_list **args);
@@ -101,7 +101,9 @@ int			is_builtin(const char *cmd);
 int			run_builtin(char **argv, t_bash *bash);
 void		execve_cmd(char **argv, char **env, t_bash *bash);
 int			apply_redirections(t_redirection *redir, t_bash *bash);
-int			handle_heredoc(t_redirection *redir);
+int			handle_heredoc(t_redirection *redir, t_bash *bash);
+char	    *hd_expand_key(const char *s, size_t *i, t_bash *bash);
+char	    *hd_expand_line(const char *s, t_bash *bash);
 int			exec_external(char **args, t_bash *bash);
 
 /* --- Command Path --- */

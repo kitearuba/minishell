@@ -59,6 +59,7 @@ SRC = 	minishell.c \
 		$(SRC_DIR)/executor/run_external_cmd.c \
 		$(SRC_DIR)/executor/redirection.c \
 		$(SRC_DIR)/executor/heredoc.c \
+		$(SRC_DIR)/executor/heredoc_utils.c \
 		$(SRC_DIR)/executor/pipes/execute_pipeline.c \
 		$(SRC_DIR)/executor/pipes/create_pipe.c \
         $(SRC_DIR)/builtin/ft_echo.c \

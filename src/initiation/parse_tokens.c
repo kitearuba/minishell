@@ -64,25 +64,35 @@ static void	finalize_cmd(t_command **head, t_command **current, t_list **args)
 }
 
 static int	parse_loop(t_command **head, t_command **current,
-	t_list **args, t_token *tok)
+    t_list **args, t_token *tok)
 {
-	while (tok)
-	{
-		if (!*current)
-		{
-			if (check_initial_errors(tok))
-				return (ft_lstclear(args, free), 1);
-			*current = new_command();
-		}
-		if (check_consecutive_pipes(tok, current))
-			return (ft_lstclear(args, free), 1);
-		if (handle_token_type(tok, current, args))
-			return (1);
-		if (tok->type == PIPE)
-			finalize_cmd(head, current, args);
-		tok = tok->next;
-	}
-	return (0);
+    while (tok)
+    {
+        if (!*current)
+        {
+            if (check_initial_errors(tok))
+                return (ft_lstclear(args, free), 1);
+            *current = new_command();
+        }
+        if (check_consecutive_pipes(tok, current))
+            return (ft_lstclear(args, free), 1);
+
+        if (tok->type >= REDIRECT_IN && tok->type <= HEREDOC)
+        {
+            if (handle_parse_redirection(tok, current))
+                return (ft_lstclear(args, free), 1);
+            if (!tok->next)
+                return (ft_lstclear(args, free), 1);
+            tok = tok->next->next;
+            continue ;
+        }
+        if (handle_token_type(tok, current, args))
+            return (1);
+        if (tok->type == PIPE)
+            finalize_cmd(head, current, args);
+        tok = tok->next;
+    }
+    return (0);
 }
 
 static t_command	*check_parse_errors(t_command *head,

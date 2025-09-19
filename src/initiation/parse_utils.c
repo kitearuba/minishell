@@ -30,26 +30,27 @@ t_command	*last_command(t_command *head)
 	return (head);
 }
 
-void	add_redirection(t_command *cmd, int type, char *filename)
+void	add_redirection(t_command *cmd, int type, char *filename, int quoted)
 {
-	t_redirection	*redirection;
-	t_redirection	*temp;
+    t_redirection	*rd;
+    t_redirection	*tmp;
 
-	redirection = malloc(sizeof(t_redirection));
-	if (!redirection)
-		return ;
-	ft_memset(redirection, 0, sizeof(t_redirection));
-	redirection->type = type;
-	redirection->filename = ft_strdup(filename);
-	if (!cmd->redirection)
-		cmd->redirection = redirection;
-	else
-	{
-		temp = cmd->redirection;
-		while (temp->next)
-			temp = temp->next;
-		temp->next = redirection;
-	}
+    rd = malloc(sizeof(t_redirection));
+    if (!rd)
+        return ;
+    ft_memset(rd, 0, sizeof(t_redirection));
+    rd->type = type;
+    rd->filename = ft_strdup(filename);
+    rd->quoted = quoted;
+    if (!cmd->redirection)
+        cmd->redirection = rd;
+    else
+    {
+        tmp = cmd->redirection;
+        while (tmp->next)
+            tmp = tmp->next;
+        tmp->next = rd;
+    }
 }
 
 t_command	*handle_parse_error(
@@ -66,14 +67,18 @@ t_command	*handle_parse_error(
 
 int	handle_parse_redirection(t_token *tok, t_command **current)
 {
-	if (tok->next)
-	{
-		add_redirection(*current, tok->type, tok->next->value);
-		return (0);
-	}
-	ft_printf_fd(2,
-		"Syntax error: missing filename after redirection\n");
-	free_commands(*current);
-	*current = NULL;
-	return (1);
+    int	quoted;
+
+    if (tok->next)
+    {
+        quoted = 0;
+        if (tok->type == HEREDOC)
+            quoted = tok->next->quoted;
+        add_redirection(*current, tok->type, tok->next->value, quoted);
+        return (0);
+    }
+    ft_printf_fd(2, "Syntax error: missing filename after redirection\n");
+    free_commands(*current);
+    *current = NULL;
+    return (1);
 }

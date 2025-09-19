@@ -12,9 +12,17 @@
 
 #include "../../include/minishell.h"
 
-static void	print_cmd_not_found(char *cmd)
+static void	print_cmd_not_found(const char *cmd, t_bash *bash)
 {
-	ft_printf_fd(2, "minishell: command not found: %s\n", cmd);
+    char	*path_val;
+
+    path_val = ft_getenv(bash->env, "PATH");
+    if (!path_val || !*path_val)
+        ft_printf_fd(STDERR_FILENO,
+            "minishell: %s: No such file or directory\n", cmd);
+    else
+        ft_printf_fd(STDERR_FILENO,
+            "minishell: %s: command not found\n", cmd);
 }
 
 static void	parent_ignore_signals(void)
@@ -111,7 +119,7 @@ int	exec_external(char **args, t_bash *bash)
 	cmd_path = get_cmd_path(args[0], bash->env);
 	if (!cmd_path)
 	{
-		print_cmd_not_found(args[0]);
+		print_cmd_not_found(args[0], bash);
 		bash->exit_status = 127;
 		return (127);
 	}
