@@ -5,8 +5,8 @@
 /*                                                    +:+ +:+         +:+     */
 /*   By: chrrodri <chrrodri@student.42barcelona.co> +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2025/09/18 06:10:00 by chrrodri          #+#    #+#             */
-/*   Updated: 2025/09/18 06:10:00 by chrrodri         ###   ########.fr       */
+/*   Created: 2025/08/18 06:10:00 by chrrodri          #+#    #+#             */
+/*   Updated: 2025/09/19 13:43:46 by chrrodri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,9 +33,17 @@ static int	env_find_index(char **env, const char *key)
 static char	*env_make_entry(const char *key, const char *val)
 {
 	char	*entry;
+	size_t	key_len;
+	size_t	val_len;
 	size_t	len;
 
-	len = ft_strlen(key) + 1 + (val ? ft_strlen(val) : 0) + 1;
+	if (!key || !*key)
+		return (NULL);
+	key_len = ft_strlen(key);
+	val_len = 0;
+	if (val)
+		val_len = ft_strlen(val);
+	len = key_len + 1 + val_len + 1;
 	entry = (char *)malloc(len);
 	if (!entry)
 		return (NULL);

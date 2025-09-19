@@ -6,7 +6,7 @@
 /*   By: chrrodri <chrrodri@student.42barcelona.co  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/20 16:21:19 by chrrodri          #+#    #+#             */
-/*   Updated: 2025/09/19 13:23:33 by chrrodri         ###   ########.fr       */
+/*   Updated: 2025/09/19 14:01:56 by chrrodri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -109,7 +109,7 @@ char		*hd_expand_line(const char *s, t_bash *bash);
 int			exec_external(char **args, t_bash *bash);
 
 /* --- Command Path --- */
-char		*get_cmd_path(char *cmd, char **envp);
+char		*get_cmd_path(const char *cmd, char **envp);
 
 /* --- Environment --- */
 char		*ft_getenv(char **envp, char *key);

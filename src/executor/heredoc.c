@@ -6,7 +6,7 @@
 /*   By: chrrodri <chrrodri@student.42barcelona.co  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/20 15:15:58 by chrrodri          #+#    #+#             */
-/*   Updated: 2025/05/20 16:45:41 by chrrodri         ###   ########.fr       */
+/*   Updated: 2025/09/19 13:56:49 by chrrodri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,7 +21,6 @@ static void	hd_parent_signals(int enable)
 	}
 	else
 	{
-		/* restore prompt-time handlers */
 		setup_signal_handlers();
 	}
 }
@@ -74,6 +73,24 @@ static pid_t	hd_spawn(int *pipefd, const char *lim, int quoted, t_bash *bash)
 	return (pid);
 }
 
+static int	hd_handle_status(int rfd, int status, t_bash *bash)
+{
+	if (WIFSIGNALED(status) && WTERMSIG(status) == SIGINT)
+	{
+		write(1, "\n", 1);
+		close(rfd);
+		bash->exit_status = 130;
+		return (-1);
+	}
+	if (WIFSIGNALED(status))
+	{
+		close(rfd);
+		bash->exit_status = 1;
+		return (-1);
+	}
+	return (rfd);
+}
+
 int	handle_heredoc(t_redirection *redir, t_bash *bash)
 {
 	int		pipefd[2];
@@ -84,7 +101,7 @@ int	handle_heredoc(t_redirection *redir, t_bash *bash)
 		return (-1);
 	if (pipe(pipefd) == -1)
 		return (-1);
-    hd_parent_signals(0);
+	hd_parent_signals(0);
 	pid = hd_spawn(pipefd, redir->filename, redir->quoted, bash);
 	if (pid < 0)
 	{
@@ -95,19 +112,6 @@ int	handle_heredoc(t_redirection *redir, t_bash *bash)
 	}
 	close(pipefd[1]);
 	waitpid(pid, &status, 0);
-    hd_parent_signals(1);
-    if (WIFSIGNALED(status) && WTERMSIG(status) == SIGINT)
-	{
-		write(1, "\n", 1);
-		close(pipefd[0]);
-		bash->exit_status = 130;
-		return (-1);
-	}
-	if (WIFSIGNALED(status))
-	{
-		close(pipefd[0]);
-		bash->exit_status = 1;
-		return (-1);
-	}
-	return (pipefd[0]);
+	hd_parent_signals(1);
+	return (hd_handle_status(pipefd[0], status, bash));
 }
