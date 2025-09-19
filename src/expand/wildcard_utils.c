@@ -6,12 +6,13 @@
 /*   By: chrrodri <chrrodri@student.42barcelona.co  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/20 15:15:58 by chrrodri          #+#    #+#             */
-/*   Updated: 2025/09/19 15:59:28 by bsamy            ###   ########.fr       */
+/*   Updated: 2025/09/19 19:28:30 by chrrodri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../../include/minishell.h"
 
+/* Basic '*' matcher, no '?', recursive, bash-like. */
 int	match_pattern(const char *p, const char *s)
 {
 	if (!*p && !*s)
@@ -23,62 +24,101 @@ int	match_pattern(const char *p, const char *s)
 		if (*s && match_pattern(p, s + 1))
 			return (1);
 	}
-	if (*p == *s)
+	if (*p && *s && *p == *s)
 		return (match_pattern(p + 1, s + 1));
 	return (0);
 }
 
-void	append_token(t_token **head, t_token **tail, t_token *new)
+static int	lexcmp(const char *a, const char *b)
 {
-	if (!*head)
-		*head = new;
-	else
-		(*tail)->next = new;
-	*tail = new;
+	size_t	la;
+	size_t	lb;
+	size_t	n;
+
+	la = ft_strlen(a);
+	lb = ft_strlen(b);
+	n = la + 1;
+	if (lb + 1 > n)
+		n = lb + 1;
+	return (ft_strncmp(a, b, n));
 }
 
-void	handle_match_loop(DIR *dir, const char *pattern,
-	t_token **head, int space_before)
+/* Insert node into list keeping ASCII-lexicographic order. */
+static void	insert_sorted(t_token **head, t_token *node)
+{
+	t_token	*prev;
+	t_token	*cur;
+
+	if (!*head || lexcmp(node->value, (*head)->value) < 0)
+	{
+		node->next = *head;
+		*head = node;
+		return ;
+	}
+	prev = *head;
+	cur = (*head)->next;
+	while (cur && lexcmp(node->value, cur->value) >= 0)
+	{
+		prev = cur;
+		cur = cur->next;
+	}
+	prev->next = node;
+	node->next = cur;
+}
+
+/* Build a sorted list of matches; first keeps original space_before. */
+static void	handle_match_loop(DIR *dir, const char *pattern,
+		t_token **head, int space_before)
 {
 	struct dirent	*entry;
-	t_token			*tmp;
-	t_token			*tail;
 	int				first;
+	int				show_hidden;
+	t_token			*tok;
 	int				sb;
 
 	first = 1;
-	tail = get_tail(*head);
-	entry = get_next_entry(dir);
+	show_hidden = 0;
+	if (pattern[0] == '.')
+		show_hidden = 1;
+	entry = readdir(dir);
 	while (entry)
 	{
-		if (entry->d_name[0] != '.' && match_pattern(pattern, entry->d_name))
+		if ((show_hidden || entry->d_name[0] != '.')
+			&& match_pattern(pattern, entry->d_name))
 		{
-			if (first)
-				sb = space_before;
-			else
+			sb = space_before;
+			if (!first)
 				sb = 1;
-			tmp = new_token(WORD, entry->d_name,
-					ft_strlen(entry->d_name), 0, sb);
-			if (tmp)
-				append_token(head, &tail, tmp);
+			tok = new_token(WORD, entry->d_name,
+					ft_strlen(entry->d_name), 0);
+			if (tok)
+			{
+				tok->space_before = sb;
+				insert_sorted(head, tok);
+			}
 			first = 0;
 		}
-		entry = get_next_entry(dir);
+		entry = readdir(dir);
 	}
 }
 
+/* Public API: expand; if no match, return literal pattern as a WORD token. */
 t_token	*wildcard_match(const char *pattern, int space_before)
 {
 	t_token	*head;
-	t_token	*tail;
+	t_token	*fallback;
 	DIR		*dir;
 
 	dir = opendir(".");
 	if (!dir)
 		return (NULL);
 	head = NULL;
-	tail = NULL;
 	handle_match_loop(dir, pattern, &head, space_before);
 	closedir(dir);
-	return (head);
+	if (head)
+		return (head);
+	fallback = new_token(WORD, pattern, ft_strlen(pattern), 0);
+	if (fallback)
+		fallback->space_before = space_before;
+	return (fallback);
 }

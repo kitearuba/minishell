@@ -37,9 +37,11 @@ SRC = 	minishell.c \
 		$(SRC_DIR)/initiation/execute_minishell.c \
 		$(SRC_DIR)/initiation/tokenize.c \
 		$(SRC_DIR)/initiation/tokenizer_utils.c \
+		$(SRC_DIR)/initiation/tokenizer_redirects.c \
 		$(SRC_DIR)/initiation/parse_tokens.c \
 		$(SRC_DIR)/initiation/parse_utils.c \
 		$(SRC_DIR)/initiation/parse_utils2.c \
+		$(SRC_DIR)/initiation/parser_cmd_utils.c \
 		$(SRC_DIR)/initiation/parser_checks.c \
 		$(SRC_DIR)/initiation/last_token_is_pipe.c \
 		$(SRC_DIR)/expand/expand.c \
@@ -52,11 +54,13 @@ SRC = 	minishell.c \
 		$(SRC_DIR)/utils/free_tokens.c \
 		$(SRC_DIR)/utils/free_commands.c \
 		$(SRC_DIR)/utils/free_all_and_exit.c \
+		$(SRC_DIR)/utils/input_utils.c \
 		$(SRC_DIR)/cmd/built_in.c \
 		$(SRC_DIR)/cmd/execute_commands.c \
 		$(SRC_DIR)/executor/get_cmd_path.c \
 		$(SRC_DIR)/executor/execve.c \
 		$(SRC_DIR)/executor/run_external_cmd.c \
+		$(SRC_DIR)/executor/run_external_cmd_utils.c \
 		$(SRC_DIR)/executor/redirection.c \
 		$(SRC_DIR)/executor/heredoc.c \
 		$(SRC_DIR)/executor/heredoc_utils.c \

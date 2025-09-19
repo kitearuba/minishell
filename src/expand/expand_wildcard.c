@@ -6,7 +6,7 @@
 /*   By: chrrodri <chrrodri@student.42barcelona.co  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/18 23:25:00 by chrrodri          #+#    #+#             */
-/*   Updated: 2025/07/19 00:30:00 by chrrodri         ###   ########.fr       */
+/*   Updated: 2025/09/19 19:23:28 by chrrodri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,7 +17,9 @@ void	replace_with_matches(t_token **tokens, t_token *prev, t_token **curr)
 	t_token	*matches;
 	t_token	*tail;
 
-	matches = wildcard_match((*curr)->value, (*curr)->space_before);
+	matches = wildcard_match(
+			(*curr)->value,
+			(*curr)->space_before);
 	if (!matches)
 		return ;
 	tail = matches;
@@ -40,6 +42,7 @@ void	expand_wildcards(t_token **tokens)
 
 	prev = NULL;
 	curr = *tokens;
+
 	while (curr)
 	{
 		if (curr->type == WORD && curr->quoted == 0

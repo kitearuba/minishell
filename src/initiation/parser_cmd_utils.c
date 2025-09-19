@@ -6,42 +6,47 @@
 /*   By: chrrodri <chrrodri@student.42barcelona.co  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/19 16:10:35 by chrrodri          #+#    #+#             */
-/*   Updated: 2025/09/19 16:28:19 by chrrodri         ###   ########.fr       */
+/*   Updated: 2025/09/19 19:52:54 by chrrodri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../../include/minishell.h"
 
-/* Convert a list of char* nodes to argv (NULL-terminated). */
+static int	list_len(t_list *args)
+{
+	int		n;
+	t_list	*tmp;
+
+	n = 0;
+	tmp = args;
+	while (tmp)
+	{
+		n++;
+		tmp = tmp->next;
+	}
+	return (n);
+}
+
 char	**list_to_argv(t_list *args)
 {
 	char	**argv;
-	t_list	*tmp;
-	int		count;
+	int		n;
 	int		i;
 
-	count = 0;
-	i = 0;
-	tmp = args;
-	while (tmp)
-	{
-		count++;
-		tmp = tmp->next;
-	}
-	argv = malloc(sizeof(char *) * (count + 1));
+	n = list_len(args);
+	argv = malloc(sizeof(char *) * (n + 1));
 	if (!argv)
 		return (NULL);
-	tmp = args;
-	while (tmp)
+	i = 0;
+	while (args)
 	{
-		argv[i++] = tmp->content;
-		tmp = tmp->next;
+		argv[i++] = args->content;
+		args = args->next;
 	}
 	argv[i] = NULL;
 	return (argv);
 }
 
-/* Finish building current command, link into list, and clear args nodes. */
 void	finalize_cmd(t_command **head, t_command **current, t_list **args)
 {
 	t_list	*tmp;

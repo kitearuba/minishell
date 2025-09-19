@@ -6,7 +6,7 @@
 /*   By: chrrodri <chrrodri@student.42barcelona.co  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/07 01:35:00 by chrrodri          #+#    #+#             */
-/*   Updated: 2025/09/19 15:05:40 by chrrodri         ###   ########.fr       */
+/*   Updated: 2025/09/19 19:52:01 by chrrodri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -41,7 +41,8 @@ int	handle_redirection(t_token *tok, t_command **current, t_list **args)
 			*current,
 			tok->type,
 			tok->next->value,
-			tok->next->quoted);
+			tok->next->quoted
+		);
 		return (0);
 	}
 	ft_printf_fd(2, "Syntax error: missing filename after redirection\n");

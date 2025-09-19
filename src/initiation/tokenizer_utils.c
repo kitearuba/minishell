@@ -6,123 +6,89 @@
 /*   By: chrrodri <chrrodri@student.42barcelona.co  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/18 14:15:32 by chrrodri          #+#    #+#             */
-/*   Updated: 2025/09/19 17:07:27 by chrrodri         ###   ########.fr       */
+/*   Updated: 2025/09/19 18:48:11 by chrrodri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../../include/minishell.h"
 
-static size_t	handle_redirect(const char *in, t_token **toks, size_t i,
-	int space)
+t_token	*new_token(t_token_type type, const char *start, size_t len, int quoted)
 {
-	if (in[i] == '>' && in[i + 1] == '>')
-	{
-		add_token(toks, new_token(REDIRECT_APPEND, &in[i], 2, 0, space));
-		i += 2;
-	}
-	else if (in[i] == '<' && in[i + 1] == '<')
-	{
-		add_token(toks, new_token(HEREDOC, &in[i], 2, 0, space));
-		i += 2;
-	}
-	else if (in[i] == '>')
-	{
-		add_token(toks, new_token(REDIRECT_OUT, &in[i], 1, 0, space));
-		i++;
-	}
-	else
-	{
-		add_token(toks, new_token(REDIRECT_IN, &in[i], 1, 0, space));
-		i++;
-	}
-	while (in[i] == ' ')
-		i++;
-	return (i);
+	t_token	*token;
+
+	token = malloc(sizeof(t_token));
+	if (!token)
+		return (NULL);
+	token->type = type;
+	token->value = ft_substr(start, 0, len);
+	token->quoted = quoted;
+	token->space_before = 0;
+	token->next = NULL;
+	return (token);
 }
 
-int	handle_quotes(const char *in, t_token **toks, size_t *i, int space)
+void	add_token(t_token **head, t_token *new)
 {
-	char	*quoted;
-	int		quoted_flag;
+	t_token	*temp;
 
-	if (in[*i] == '\'')
-		quoted_flag = 1;
-	else
-		quoted_flag = 2;
-	quoted = extract_quoted_token(in, i);
-	if (!quoted)
-		return (0);
-	add_token(toks, new_token(WORD, quoted, ft_strlen(quoted),
-			quoted_flag, space));
-	free(quoted);
-	return (1);
+	if (!*head)
+	{
+		*head = new;
+		return ;
+	}
+	temp = *head;
+	while (temp->next)
+		temp = temp->next;
+	temp->next = new;
 }
 
-size_t	handle_env_var(const char *in, t_token **toks, size_t i, int space)
+size_t	handle_pipe(const char *input, t_token **tokens, size_t i,
+		int space_before)
+{
+	t_token	*tok;
+
+	tok = new_token(PIPE, &input[i], 1, 0);
+	if (!tok)
+		return (i + 1);
+	tok->space_before = space_before;
+	add_token(tokens, tok);
+	return (i + 1);
+}
+
+size_t	handle_word(const char *input, t_token **tokens, size_t i,
+		int space_before)
 {
 	size_t	start;
+	t_token	*tok;
 
-	if (in[i + 1] == '?')
-	{
-		add_token(toks, new_token(ENV_VAR, &in[i], 2, 0, space));
-		return (i + 2);
-	}
-	start = i + 1;
-	i = start;
-	while (in[i] && (ft_isalnum(in[i]) || in[i] == '_'))
+	start = i;
+	while (input[i]
+		&& input[i] != ' ' && input[i] != '|' && input[i] != '<'
+		&& input[i] != '>' && input[i] != '\'' && input[i] != '"'
+		&& input[i] != '$')
 		i++;
-	if (i == start)
-	{
-		add_token(toks, new_token(WORD, &in[i - 1], 1, 0, space));
-		return (start);
-	}
-	add_token(toks, new_token(ENV_VAR, &in[start - 1], i - start + 1, 0,
-			space));
+	tok = new_token(WORD, &input[start], i - start, 0);
+	if (!tok)
+		return (i);
+	tok->space_before = space_before;
+	add_token(tokens, tok);
 	return (i);
 }
 
-static int	dispatch_token(const char *in, t_token **toks, size_t *i, int space)
+char	*extract_quoted_token(const char *line, size_t *index)
 {
-	if (in[*i] == '|')
-		*i = handle_pipe(in, toks, *i, space);
-	else if (in[*i] == '>' || in[*i] == '<')
-		*i = handle_redirect(in, toks, *i, space);
-	else if (in[*i] == '\'' || in[*i] == '"')
-	{
-		if (!handle_quotes(in, toks, i, space))
-		{
-			ft_printf_fd(2, "minishell: syntax error: unmatched quote\n");
-			free_tokens(*toks);
-			return (0);
-		}
-	}
-	else if (in[*i] == '$')
-		*i = handle_env_var(in, toks, *i, space);
-	else
-		*i = handle_word(in, toks, *i, space);
-	return (1);
-}
+	char	quote_char;
+	size_t	start;
+	size_t	end;
 
-t_token	*tokenize_input(const char *input)
-{
-	t_token	*tokens;
-	size_t	i;
-	int		space;
-
-	tokens = NULL;
-	i = 0;
-	while (input[i])
-	{
-		space = 0;
-		while (input[i] == ' ')
-		{
-			space = 1;
-			i++;
-		}
-		if (!input[i])
-			break ;
-		if (!dispatch_token(input, &tokens, &i, space))
-			return (NULL);
-	}
-	return (tokens);
+	quote_char = line[*index];
+	(*index)++;
+	start = *index;
+	while (line[*index] && line[*index] != quote_char)
+		(*index)++;
+	if (line[*index] != quote_char)
+		return (NULL);
+	end = *index;
+	(*index)++;
+	return (ft_substr(&line[start], 0, end - start));
 }
