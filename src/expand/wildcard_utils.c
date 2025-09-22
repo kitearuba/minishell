@@ -29,18 +29,9 @@ int	match_pattern(const char *p, const char *s)
 	return (0);
 }
 
-static int	lexcmp(const char *a, const char *b)
+static int lexcmp(const char *a, const char *b)
 {
-	size_t	la;
-	size_t	lb;
-	size_t	n;
-
-	la = ft_strlen(a);
-	lb = ft_strlen(b);
-	n = la + 1;
-	if (lb + 1 > n)
-		n = lb + 1;
-	return (ft_strncmp(a, b, n));
+    return ft_strcmp(a, b);
 }
 
 /* Insert node into list keeping ASCII-lexicographic order. */

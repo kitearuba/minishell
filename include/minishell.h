@@ -85,7 +85,6 @@ size_t							append_redirect_token(const char *in,
 
 /* --- Expander --- */
 struct dirent					*get_next_entry(DIR *dir);
-t_token							*get_tail(t_token *head);
 char							*expand_token_value(t_token *token,
 									t_bash *bash);
 void							expand_env_var(t_token **head,
@@ -97,8 +96,6 @@ void							expand_one(t_token **head, t_token **prev,
 char							*get_env_value(const char *key, char **env);
 char							*append_and_free(char *s1, char *s2);
 void							expand_wildcards(t_token **tokens);
-void							replace_with_matches(t_token **tokens,
-									t_token *prev, t_token **curr);
 t_token							*wildcard_match(const char *pattern,
 									int space_before);
 
@@ -177,8 +174,5 @@ int								fork_and_exec(t_command *cmd, int input_fd,
 void							setup_signal_handlers(void);
 void							setup_child_signals(void);
 volatile sig_atomic_t			*get_sigint_flag(void);
-
-/* --- Wildcard Expansion --- */
-char							**expand_token_if_wildcard(char *token);
 
 #endif /* MINISHELL_H */

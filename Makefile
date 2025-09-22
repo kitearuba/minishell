@@ -76,8 +76,6 @@ SRC = 	minishell.c \
         $(SRC_DIR)/builtin/ft_exit.c \
         $(SRC_DIR)/builtin/builtin_utils.c \
         $(SRC_DIR)/signal/signal.c \
-        $(SRC_DIR)/bonus/wildcard.c \
-
 
 OBJ         = $(SRC:.c=.o)
 DEP         = $(OBJ:.o=.d)

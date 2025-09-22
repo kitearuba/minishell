@@ -40,11 +40,19 @@ char	**list_to_argv(t_list *args)
 	i = 0;
 	while (args)
 	{
-		argv[i++] = args->content;
-		args = args->next;
+	    argv[i] = ft_strdup((char *)args->content);
+	    if (!argv[i])
+	    {
+	        while (i > 0)
+	            free(argv[--i]);
+	        free(argv);
+	        return (NULL);
+	    }
+	    i++;
+	    args = args->next;
 	}
-	argv[i] = NULL;
-	return (argv);
+    argv[i] = NULL;
+    return (argv);
 }
 
 void	finalize_cmd(t_command **head, t_command **current, t_list **args)
@@ -55,17 +63,18 @@ void	finalize_cmd(t_command **head, t_command **current, t_list **args)
 	if (!*current)
 		return ;
 	(*current)->argv = list_to_argv(*args);
-	tmp = *args;
-	while (tmp)
-	{
-		next = tmp->next;
-		free(tmp);
-		tmp = next;
-	}
-	*args = NULL;
-	if (!*head)
-		*head = *current;
-	else
-		last_command(*head)->next = *current;
-	*current = NULL;
+    tmp = *args;
+    while (tmp)
+    {
+        next = tmp->next;
+        free(tmp->content);
+        free(tmp);
+        tmp = next;
+    }
+    *args = NULL;
+    if (!*head)
+        *head = *current;
+    else
+        last_command(*head)->next = *current;
+    *current = NULL;
 }

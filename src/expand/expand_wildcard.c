@@ -12,46 +12,47 @@
 
 #include "../../include/minishell.h"
 
-void	replace_with_matches(t_token **tokens, t_token *prev, t_token **curr)
+static t_token *get_tail(t_token *n)
 {
-	t_token	*matches;
-	t_token	*tail;
-
-	matches = wildcard_match(
-			(*curr)->value,
-			(*curr)->space_before);
-	if (!matches)
-		return ;
-	tail = matches;
-	while (tail->next)
-		tail = tail->next;
-	tail->next = (*curr)->next;
-	if (prev)
-		prev->next = matches;
-	else
-		*tokens = matches;
-	free((*curr)->value);
-	free(*curr);
-	*curr = tail->next;
+    while (n && n->next)
+    {
+        n = n->next;
+    }
+    return n;
 }
 
-void	expand_wildcards(t_token **tokens)
+static t_token *replace_with_matches(t_token **tokens, t_token *prev, t_token **curr)
 {
-	t_token	*prev;
-	t_token	*curr;
+    t_token *matches = wildcard_match((*curr)->value, (*curr)->space_before);
+    t_token *tail;
 
-	prev = NULL;
-	curr = *tokens;
+    if (!matches)
+        return prev;
+    tail = get_tail(matches);
+    tail->next = (*curr)->next;
+    if (prev)
+        prev->next = matches;
+    else
+        *tokens = matches;
+    free((*curr)->value);
+    free(*curr);
+    *curr = tail->next;
+    return tail;
+}
 
-	while (curr)
-	{
-		if (curr->type == WORD && curr->quoted == 0
-			&& ft_strchr(curr->value, '*'))
-		{
-			replace_with_matches(tokens, prev, &curr);
-			continue ;
-		}
-		prev = curr;
-		curr = curr->next;
-	}
+void expand_wildcards(t_token **tokens)
+{
+    t_token *prev = NULL;
+    t_token *curr = *tokens;
+
+    while (curr)
+    {
+        if (curr->type == WORD && curr->quoted == 0 && ft_strchr(curr->value, '*'))
+        {
+            prev = replace_with_matches(tokens, prev, &curr);
+            continue;
+        }
+        prev = curr;
+        curr = curr->next;
+    }
 }
