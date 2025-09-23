@@ -6,7 +6,7 @@
 /*   By: chrrodri <chrrodri@student.42barcelona.co  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/20 16:21:19 by chrrodri          #+#    #+#             */
-/*   Updated: 2025/09/19 19:42:46 by chrrodri         ###   ########.fr       */
+/*   Updated: 2025/09/23 22:42:58 by chrrodri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -98,6 +98,7 @@ char							*append_and_free(char *s1, char *s2);
 void							expand_wildcards(t_token **tokens);
 t_token							*wildcard_match(const char *pattern,
 									int space_before);
+int								match_pattern(const char *p, const char *s);
 
 /* --- Parser --- */
 t_command						*parse_tokens(t_token *tokens);

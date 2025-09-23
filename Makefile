@@ -48,6 +48,7 @@ SRC = 	minishell.c \
 		$(SRC_DIR)/expand/expand_utils.c \
 		$(SRC_DIR)/expand/expand_wildcard.c \
 		$(SRC_DIR)/expand/wildcard_utils.c \
+		$(SRC_DIR)/expand/wildcard_utils_2.c \
 		$(SRC_DIR)/env/ft_getenv.c \
 		$(SRC_DIR)/env/env_set.c \
 		$(SRC_DIR)/utils/free_2d_array.c \

@@ -6,32 +6,15 @@
 /*   By: chrrodri <chrrodri@student.42barcelona.co  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/20 15:15:58 by chrrodri          #+#    #+#             */
-/*   Updated: 2025/09/19 19:28:30 by chrrodri         ###   ########.fr       */
+/*   Updated: 2025/09/23 22:39:32 by chrrodri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../../include/minishell.h"
 
-/* Basic '*' matcher, no '?', recursive, bash-like. */
-int	match_pattern(const char *p, const char *s)
+static int	lexcmp(const char *a, const char *b)
 {
-	if (!*p && !*s)
-		return (1);
-	if (*p == '*')
-	{
-		if (match_pattern(p + 1, s))
-			return (1);
-		if (*s && match_pattern(p, s + 1))
-			return (1);
-	}
-	if (*p && *s && *p == *s)
-		return (match_pattern(p + 1, s + 1));
-	return (0);
-}
-
-static int lexcmp(const char *a, const char *b)
-{
-    return ft_strcmp(a, b);
+	return (ft_strcmp(a, b));
 }
 
 /* Insert node into list keeping ASCII-lexicographic order. */
@@ -57,6 +40,18 @@ static void	insert_sorted(t_token **head, t_token *node)
 	node->next = cur;
 }
 
+/* Create token for name, set space_before, and insert sorted. */
+static void	append_name(t_token **head, const char *name, int sb)
+{
+	t_token	*tok;
+
+	tok = new_token(WORD, name, ft_strlen(name), 0);
+	if (!tok)
+		return ;
+	tok->space_before = sb;
+	insert_sorted(head, tok);
+}
+
 /* Build a sorted list of matches; first keeps original space_before. */
 static void	handle_match_loop(DIR *dir, const char *pattern,
 		t_token **head, int space_before)
@@ -64,7 +59,6 @@ static void	handle_match_loop(DIR *dir, const char *pattern,
 	struct dirent	*entry;
 	int				first;
 	int				show_hidden;
-	t_token			*tok;
 	int				sb;
 
 	first = 1;
@@ -80,13 +74,7 @@ static void	handle_match_loop(DIR *dir, const char *pattern,
 			sb = space_before;
 			if (!first)
 				sb = 1;
-			tok = new_token(WORD, entry->d_name,
-					ft_strlen(entry->d_name), 0);
-			if (tok)
-			{
-				tok->space_before = sb;
-				insert_sorted(head, tok);
-			}
+			append_name(head, entry->d_name, sb);
 			first = 0;
 		}
 		entry = readdir(dir);
