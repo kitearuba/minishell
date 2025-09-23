@@ -6,7 +6,7 @@
 /*   By: chrrodri <chrrodri@student.42barcelona.co  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/20 16:21:19 by chrrodri          #+#    #+#             */
-/*   Updated: 2025/09/23 22:42:58 by chrrodri         ###   ########.fr       */
+/*   Updated: 2025/09/23 23:47:38 by chrrodri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,10 +34,6 @@
 /* ============================== MACROS ================================= */
 
 # define BUILTIN_CMDS ":echo:cd:pwd:export:unset:env:exit:"
-
-/* ========================== GLOBAL VARIABLE ============================ */
-
-extern volatile sig_atomic_t	g_heredoc_interrupted;
 
 /* ======================== FUNCTION PROTOTYPES ========================== */
 

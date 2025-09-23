@@ -6,7 +6,7 @@
 /*   By: chrrodri <chrrodri@student.42barcelona.co  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/21 20:30:00 by chrrodri          #+#    #+#             */
-/*   Updated: 2025/09/23 22:41:04 by chrrodri         ###   ########.fr       */
+/*   Updated: 2025/09/23 22:56:35 by chrrodri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -38,30 +38,6 @@ void	setup_signal_handlers(void)
 	sa.sa_handler = prompt_sigint;
 	sigemptyset(&sa.sa_mask);
 	sa.sa_flags = SA_RESTART;
-	sigaction(SIGINT, &sa, 0);
-	signal(SIGQUIT, SIG_IGN);
-}
-
-/* Heredoc: stop readline immediately, no redisplay, no SA_RESTART */
-static void	heredoc_sigint(int signum)
-{
-	extern int	rl_done;
-
-	(void)signum;
-	g_sig = SIGINT;
-	write(1, "\n", 1);
-	rl_replace_line("", 0);
-	rl_done = 1;
-}
-
-void	setup_heredoc_signals(void)
-{
-	struct sigaction	sa;
-
-	ft_bzero(&sa, sizeof(sa));
-	sa.sa_handler = heredoc_sigint;
-	sigemptyset(&sa.sa_mask);
-	sa.sa_flags = 0;
 	sigaction(SIGINT, &sa, 0);
 	signal(SIGQUIT, SIG_IGN);
 }
