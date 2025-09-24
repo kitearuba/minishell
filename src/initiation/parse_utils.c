@@ -10,7 +10,7 @@
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../../include/minishell.h"
+#include "minishell.h"
 
 t_command	*new_command(void)
 {
@@ -77,7 +77,7 @@ int	handle_parse_redirection(t_token *tok, t_command **current)
 	if (tok->next)
 	{
 		quoted = 0;
-		if (tok->type == HEREDOC)
+		if (tok->type == heredoc_tok)
 			quoted = tok->next->quoted;
 		add_redirection(*current, tok->type, tok->next->value, quoted);
 		return (0);

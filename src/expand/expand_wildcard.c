@@ -51,7 +51,7 @@ void	expand_wildcards(t_token **tokens)
 	curr = *tokens;
 	while (curr)
 	{
-		if (curr->type == WORD
+		if (curr->type == word
 			&& curr->quoted == 0 && ft_strchr(curr->value, '*'))
 		{
 			prev = replace_with_matches(tokens, prev, &curr);

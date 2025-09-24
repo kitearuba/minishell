@@ -38,7 +38,7 @@ static int	process_token(t_token **ptok, t_command **head,
 	t_token	*tok;
 
 	tok = *ptok;
-	if (tok->type >= REDIRECT_IN && tok->type <= HEREDOC)
+	if (tok->type >= redirect_in && tok->type <= heredoc_tok)
 	{
 		if (handle_parse_redirection(tok, current))
 		{
@@ -55,7 +55,7 @@ static int	process_token(t_token **ptok, t_command **head,
 	}
 	if (handle_token_type(tok, current, args))
 		return (1);
-	if (tok->type == PIPE)
+	if (tok->type == pipe_tok)
 		finalize_cmd(head, current, args);
 	*ptok = tok->next;
 	return (0);
@@ -114,7 +114,7 @@ t_command	*parse_tokens(t_token *tokens)
 	head = NULL;
 	current = NULL;
 	args = NULL;
-	if (tokens && tokens->type == PIPE)
+	if (tokens && tokens->type == pipe_tok)
 	{
 		ft_printf_fd(2, "Syntax error: unexpected token `|'\n");
 		return (NULL);

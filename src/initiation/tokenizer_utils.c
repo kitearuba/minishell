@@ -10,7 +10,7 @@
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../../include/minishell.h"
+#include "minishell.h"
 
 t_token	*new_token(t_token_type type, const char *start, size_t len, int quoted)
 {
@@ -47,7 +47,7 @@ size_t	handle_pipe(const char *input, t_token **tokens, size_t i,
 {
 	t_token	*tok;
 
-	tok = new_token(PIPE, &input[i], 1, 0);
+	tok = new_token(pipe_tok, &input[i], 1, 0);
 	if (!tok)
 		return (i + 1);
 	tok->space_before = space_before;
@@ -67,7 +67,7 @@ size_t	handle_word(const char *input, t_token **tokens, size_t i,
 		&& input[i] != '>' && input[i] != '\'' && input[i] != '"'
 		&& input[i] != '$')
 		i++;
-	tok = new_token(WORD, &input[start], i - start, 0);
+	tok = new_token(word, &input[start], i - start, 0);
 	if (!tok)
 		return (i);
 	tok->space_before = space_before;

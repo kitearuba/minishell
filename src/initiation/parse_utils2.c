@@ -10,7 +10,7 @@
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../../include/minishell.h"
+#include "minishell.h"
 
 void	add_token_argument(t_token *tok, t_list **args)
 {
@@ -54,8 +54,8 @@ int	handle_redirection(t_token *tok, t_command **current, t_list **args)
 int	handle_token_type(t_token *tok, t_command **current, t_list **args)
 {
 	(void)current;
-	if (tok->type == WORD || tok->type == SINGLE_QUOTE
-		|| tok->type == DOUBLE_QUOTE || tok->type == ENV_VAR)
+	if (tok->type == word || tok->type == single_quote
+		|| tok->type == double_quote || tok->type == env_var)
 		add_token_argument(tok, args);
 	return (0);
 }

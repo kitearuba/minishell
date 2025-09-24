@@ -6,7 +6,7 @@
 /*   By: chrrodri <chrrodri@student.42barcelona.co  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/20 16:21:19 by chrrodri          #+#    #+#             */
-/*   Updated: 2025/09/19 12:22:12 by chrrodri         ###   ########.fr       */
+/*   Updated: 2025/09/24 01:47:12 by chrrodri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,27 +15,27 @@
 
 typedef enum e_token_type
 {
-	WORD,
-	PIPE,
-	REDIRECT_IN,
-	REDIRECT_OUT,
-	REDIRECT_APPEND,
-	HEREDOC,
-	SINGLE_QUOTE,
-	DOUBLE_QUOTE,
-	ENV_VAR
+	word,
+	pipe_tok,
+	redirect_in,
+	redirect_out,
+	redirect_append,
+	heredoc_tok,
+	single_quote,
+	double_quote,
+	env_var
 }	t_token_type;
 
 typedef enum e_builtin_type
 {
-	NO_BUILTIN = 0,
-	BUILTIN_CD,
-	BUILTIN_PWD,
-	BUILTIN_ECHO,
-	BUILTIN_ENV,
-	BUILTIN_EXIT,
-	BUILTIN_EXPORT,
-	BUILTIN_UNSET
+	builtin_none = 0,
+	builtin_cd,
+	builtin_pwd,
+	builtin_echo,
+	builtin_env,
+	builtin_exit,
+	builtin_export,
+	builtin_unset
 }	t_builtin_type;
 
 typedef struct s_token

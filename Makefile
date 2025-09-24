@@ -1,31 +1,30 @@
 # **************************************************************************** #
 #                              Project Information                             #
 # **************************************************************************** #
-NAME        = minishell
+NAME            = minishell
 
 # **************************************************************************** #
 #                            Compiler and Flags                                #
 # **************************************************************************** #
-CC          = cc
-CFLAGS      = -Wall -Wextra -Werror -MMD
-MAKE        = make
+CC              = cc
+CFLAGS          = -Wall -Wextra -Werror -MMD -MP
+MAKE            = make
 
 # **************************************************************************** #
 #                              Directories                                     #
 # **************************************************************************** #
-
 SRC_DIR         = src
 LIBFT_DIR       = libft
 INC_DIR         = include
+LIBFT_INC_DIR   = $(LIBFT_DIR)/include
 
 # **************************************************************************** #
-#                      File Paths and Dependencies                             #
+#                          File Paths and Deps                                 #
 # **************************************************************************** #
-
 MAKEFILE        = Makefile
-HEADER          = $(INC_DIR)/minishell.h $(INC_DIR)/buildin.c
+HEADER          = $(INC_DIR)/minishell.h
 LIBFT_A         = $(LIBFT_DIR)/libft.a
-LIBFT_H         = $(LIBFT_DIR)/$(INC_DIR)/libft.h
+LIBFT_H         = $(LIBFT_INC_DIR)/libft.h
 LIBFT_MAKEFILE  = $(LIBFT_DIR)/$(MAKEFILE)
 DEPS            = $(HEADER) $(MAKEFILE)
 
@@ -76,35 +75,35 @@ SRC = 	minishell.c \
         $(SRC_DIR)/builtin/ft_env.c \
         $(SRC_DIR)/builtin/ft_exit.c \
         $(SRC_DIR)/builtin/builtin_utils.c \
-        $(SRC_DIR)/signal/signal.c \
+        $(SRC_DIR)/signal/signal.c
 
-OBJ         = $(SRC:.c=.o)
-DEP         = $(OBJ:.o=.d)
+OBJ             = $(SRC:.c=.o)
+DEP             = $(OBJ:.o=.d)
 
 # **************************************************************************** #
 #                                Headers                                       #
 # **************************************************************************** #
-INCLUDES    = -I$(INC_DIR) -I$(LIBFT_DIR)
+INCLUDES        = -I$(INC_DIR) -I$(LIBFT_INC_DIR)
 
 # **************************************************************************** #
 #                                Rules                                         #
 # **************************************************************************** #
-
 all: $(NAME)
 
 $(NAME): $(OBJ) $(LIBFT_A)
-	$(CC) $(CFLAGS) $(OBJ) $(LIBFT_A) -I$(INCLUDES) -lreadline -o $(NAME)
+	$(CC) $(CFLAGS) $(OBJ) $(LIBFT_A) $(INCLUDES) -lreadline -o $(NAME)
 
-$(SRC_DIR)/%.o: $(SRC_DIR)/%.c $(DEPS)
+# Generic rule (handles files in root and subdirs)
+%.o: %.c $(DEPS)
 	$(CC) $(CFLAGS) $(INCLUDES) -c $< -o $@
 
-# Rule to rebuild libft.a
-$(LIBFT_A): $(LIBFT_MAKEFILE) $(LIBFT_SRC) $(LIBFT_H)
+# Build libft
+$(LIBFT_A): $(LIBFT_MAKEFILE) $(LIBFT_H)
 	$(MAKE) -C $(LIBFT_DIR)
 
 clean:
 	$(RM) $(OBJ) $(DEP)
-	$(MAKE) -C $(LIBFT_DIR)  clean
+	$(MAKE) -C $(LIBFT_DIR) clean
 
 fclean: clean
 	$(RM) $(NAME)
@@ -114,4 +113,4 @@ re: fclean all
 
 -include $(DEP)
 
-.PHONY: all clean fclean re bonus
+.PHONY: all clean fclean re

@@ -10,7 +10,7 @@
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../../include/minishell.h"
+#include "minishell.h"
 
 /* tiny helper to set space_before and append safely */
 static void	push_tok(t_token **toks, t_token *tok, int space)
@@ -34,7 +34,7 @@ int	handle_quotes(const char *in, t_token **toks, size_t *i, int space)
 	quoted = extract_quoted_token(in, i);
 	if (!quoted)
 		return (0);
-	tok = new_token(WORD, quoted, ft_strlen(quoted), quoted_flag);
+	tok = new_token(word, quoted, ft_strlen(quoted), quoted_flag);
 	push_tok(toks, tok, space);
 	free(quoted);
 	return (1);
@@ -49,7 +49,7 @@ size_t	handle_env_var(const char *in, t_token **toks, size_t i, int space)
 	tok = NULL;
 	if (in[i + 1] == '?')
 	{
-		tok = new_token(ENV_VAR, &in[i], 2, 0);
+		tok = new_token(env_var, &in[i], 2, 0);
 		push_tok(toks, tok, space);
 		return (i + 2);
 	}
@@ -59,11 +59,11 @@ size_t	handle_env_var(const char *in, t_token **toks, size_t i, int space)
 		i++;
 	if (i == start)
 	{
-		tok = new_token(WORD, &in[i - 1], 1, 0);
+		tok = new_token(word, &in[i - 1], 1, 0);
 		push_tok(toks, tok, space);
 		return (start);
 	}
-	tok = new_token(ENV_VAR, &in[start - 1], i - start + 1, 0);
+	tok = new_token(env_var, &in[start - 1], i - start + 1, 0);
 	push_tok(toks, tok, space);
 	return (i);
 }

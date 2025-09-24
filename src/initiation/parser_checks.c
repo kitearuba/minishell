@@ -10,11 +10,11 @@
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../../include/minishell.h"
+#include "minishell.h"
 
 int	check_leading_pipe(t_token *tokens, t_command *head, t_command *current)
 {
-	if (tokens && tokens->type == PIPE)
+	if (tokens && tokens->type == pipe_tok)
 	{
 		ft_printf_fd(2, "Syntax error: unexpected token `|'\n");
 		if (head)
@@ -63,12 +63,12 @@ int	check_initial_errors(t_token *tok)
 {
 	if (!tok)
 		return (0);
-	if (tok->type == PIPE)
+	if (tok->type == pipe_tok)
 	{
 		ft_printf_fd(2, "Syntax error: unexpected token `|'\n");
 		return (1);
 	}
-	if (tok->type >= REDIRECT_IN && tok->type <= HEREDOC)
+	if (tok->type >= redirect_in && tok->type <= heredoc_tok)
 	{
 		ft_printf_fd(2,
 			"Syntax error: unexpected redirection with no command\n");
@@ -79,10 +79,10 @@ int	check_initial_errors(t_token *tok)
 
 int	check_consecutive_pipes(t_token *tok, t_command **current)
 {
-	if (tok->type == PIPE && tok->next
-		&& (tok->next->type == PIPE
-			|| (tok->next->type >= REDIRECT_IN
-				&& tok->next->type <= HEREDOC)))
+	if (tok->type == pipe_tok && tok->next
+		&& (tok->next->type == pipe_tok
+			|| (tok->next->type >= redirect_in
+				&& tok->next->type <= heredoc_tok)))
 	{
 		ft_printf_fd(2, "Syntax error: unexpected token `|'\n");
 		free_commands(*current);

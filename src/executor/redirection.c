@@ -10,21 +10,32 @@
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../../include/minishell.h"
+#include "minishell.h"
 
 static int	apply_fd(t_redirection *r, int fd)
 {
 	if (fd < 0)
-		return (perror(r->filename), 1);
-	if (r->type == REDIRECT_IN || r->type == HEREDOC)
+	{
+		perror(r->filename);
+		return (1);
+	}
+	if (r->type == redirect_in || r->type == heredoc_tok)
 	{
 		if (dup2(fd, STDIN_FILENO) < 0)
-			return (perror("dup2"), 1);
+		{
+			perror("dup2");
+			close(fd);
+			return (1);
+		}
 	}
-	else if (r->type == REDIRECT_OUT || r->type == REDIRECT_APPEND)
+	else if (r->type == redirect_out || r->type == redirect_append)
 	{
 		if (dup2(fd, STDOUT_FILENO) < 0)
-			return (perror("dup2"), 1);
+		{
+			perror("dup2");
+			close(fd);
+			return (1);
+		}
 	}
 	close(fd);
 	return (0);
@@ -32,11 +43,17 @@ static int	apply_fd(t_redirection *r, int fd)
 
 static int	open_fd_for_redir(t_redirection *r)
 {
-	if (r->type == REDIRECT_IN)
+	if (r->type == redirect_in)
 		return (open(r->filename, O_RDONLY));
-	if (r->type == REDIRECT_OUT)
-		return (open(r->filename, O_WRONLY | O_CREAT | O_TRUNC, 0644));
-	return (open(r->filename, O_WRONLY | O_CREAT | O_APPEND, 0644));
+	if (r->type == redirect_out)
+		return (open(
+				r->filename,
+				O_WRONLY | O_CREAT | O_TRUNC,
+				0644));
+	return (open(
+			r->filename,
+			O_WRONLY | O_CREAT | O_APPEND,
+			0644));
 }
 
 static int	heredoc_to_stdin(t_redirection *r, t_bash *bash)
@@ -71,7 +88,7 @@ int	apply_redirections(t_redirection *r, t_bash *bash)
 
 	while (r)
 	{
-		if (r->type == HEREDOC)
+		if (r->type == heredoc_tok)
 		{
 			st = heredoc_to_stdin(r, bash);
 			if (st != 0)

@@ -45,7 +45,7 @@ static void	append_name(t_token **head, const char *name, int sb)
 {
 	t_token	*tok;
 
-	tok = new_token(WORD, name, ft_strlen(name), 0);
+	tok = new_token(word, name, ft_strlen(name), 0);
 	if (!tok)
 		return ;
 	tok->space_before = sb;
@@ -96,7 +96,7 @@ t_token	*wildcard_match(const char *pattern, int space_before)
 	closedir(dir);
 	if (head)
 		return (head);
-	fallback = new_token(WORD, pattern, ft_strlen(pattern), 0);
+	fallback = new_token(word, pattern, ft_strlen(pattern), 0);
 	if (fallback)
 		fallback->space_before = space_before;
 	return (fallback);

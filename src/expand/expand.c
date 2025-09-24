@@ -85,7 +85,7 @@ void	expand_env_var(t_token **head, t_token **prev, t_token **cur, t_bash *b)
 	}
 	free((*cur)->value);
 	(*cur)->value = exp;
-	(*cur)->type = WORD;
+	(*cur)->type = word;
 	*prev = *cur;
 	*cur = (*cur)->next;
 }
@@ -94,7 +94,7 @@ void	expand_one(t_token **head, t_token **prev, t_token **cur, t_bash *b)
 {
 	char	*exp;
 
-	if ((*cur)->type == ENV_VAR)
+	if ((*cur)->type == env_var)
 	{
 		expand_env_var(head, prev, cur, b);
 		return ;
@@ -106,7 +106,7 @@ void	expand_one(t_token **head, t_token **prev, t_token **cur, t_bash *b)
 		{
 			free((*cur)->value);
 			(*cur)->value = exp;
-			(*cur)->type = WORD;
+			(*cur)->type = word;
 		}
 	}
 	*prev = *cur;
