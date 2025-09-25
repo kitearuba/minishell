@@ -68,21 +68,21 @@ int	check_initial_errors(t_token *tok)
 		ft_printf_fd(2, "Syntax error: unexpected token `|'\n");
 		return (1);
 	}
+	/*
 	if (tok->type >= redirect_in && tok->type <= heredoc_tok)
 	{
 		ft_printf_fd(2,
 			"Syntax error: unexpected redirection with no command\n");
 		return (1);
 	}
+	*/
 	return (0);
 }
 
 int	check_consecutive_pipes(t_token *tok, t_command **current)
 {
 	if (tok->type == pipe_tok && tok->next
-		&& (tok->next->type == pipe_tok
-			|| (tok->next->type >= redirect_in
-				&& tok->next->type <= heredoc_tok)))
+		&& tok->next->type == pipe_tok)
 	{
 		ft_printf_fd(2, "Syntax error: unexpected token `|'\n");
 		free_commands(*current);

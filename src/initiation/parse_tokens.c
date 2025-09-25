@@ -87,6 +87,8 @@ static int	parse_loop(t_command **head, t_command **current,
 static t_command	*check_parse_errors(t_command *head,
 		t_command *current, t_list *args, t_token *tokens)
 {
+	if (!tokens)
+		return (NULL);
 	if (current)
 		finalize_cmd(&head, &current, &args);
 	if (last_token_is_pipe(tokens))

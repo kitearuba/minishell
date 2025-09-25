@@ -6,11 +6,11 @@
 /*   By: chrrodri <chrrodri@student.42barcelona.co  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/07 03:00:00 by chrrodri          #+#    #+#             */
-/*   Updated: 2025/09/19 13:14:55 by chrrodri         ###   ########.fr       */
+/*   Updated: 2025/09/25 10:59:42 by chrrodri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../../include/minishell.h"
+#include "minishell.h"
 
 static void	cd_error(const char *dest)
 {
@@ -63,6 +63,12 @@ int	ft_cd(char **argv, t_bash *bash)
 	char	oldpwd[PATH_MAX];
 	char	*dest;
 
+	if (argv[1] && argv[2])
+	{
+		ft_printf_fd(STDERR_FILENO, "minishell: cd: too many arguments\n");
+		bash->exit_status = 1;
+		return (1);
+	}
 	if (!getcwd(oldpwd, sizeof(oldpwd)))
 		oldpwd[0] = '\0';
 	if (resolve_dest(bash, argv, &dest))

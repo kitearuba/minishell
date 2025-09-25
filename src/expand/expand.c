@@ -6,12 +6,12 @@
 /*   By: chrrodri <chrrodri@student.42barcelona.co  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/04 14:10:00 by chrrodri          #+#    #+#             */
-/*   Updated: 2025/09/23 23:46:56 by chrrodri         ###   ########.fr       */
+/*   Updated: 2025/09/25 11:27:35 by chrrodri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../../include/minishell.h"
-
+/*
 static char	*extract_var_value(char **s, t_bash *bash)
 {
 	int		len;
@@ -32,6 +32,33 @@ static char	*extract_var_value(char **s, t_bash *bash)
 	*s += len;
 	return (val);
 }
+*/
+static char	*extract_var_value(char **s, t_bash *bash)
+{
+	int		len;
+	char	*var;
+	char	*val;
+
+	if (**s == '?')
+	{
+		(*s)++;
+		return (ft_itoa(bash->exit_status));
+	}
+	len = 0;
+	while ((*s)[len] && (ft_isalnum((*s)[len]) || (*s)[len] == '_'))
+		len++;
+	if (len == 0)
+	{
+		/* No valid name after '$' (inside double quotes): keep literal '$' */
+		return (ft_strdup("$"));
+	}
+	var = ft_substr(*s, 0, len);
+	val = ft_strdup(get_env_value(var, bash->env));
+	free(var);
+	*s += len;
+	return (val);
+}
+
 
 static char	*expand_in_double_quotes(const char *str, t_bash *bash)
 {

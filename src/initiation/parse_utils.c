@@ -6,7 +6,7 @@
 /*   By: chrrodri <chrrodri@student.42barcelona.co  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/29 14:15:32 by chrrodri          #+#    #+#             */
-/*   Updated: 2025/09/19 15:42:33 by chrrodri         ###   ########.fr       */
+/*   Updated: 2025/09/25 11:07:44 by chrrodri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,60 +30,42 @@ t_command	*last_command(t_command *head)
 	return (head);
 }
 
-void	add_redirection(t_command *cmd, int type, char *filename, int quoted)
-{
-	t_redirection	*rd;
-	t_redirection	*tmp;
-
-	rd = malloc(sizeof(t_redirection));
-	if (!rd)
-		return ;
-	ft_memset(rd, 0, sizeof(t_redirection));
-	rd->type = type;
-	rd->filename = ft_strdup(filename);
-	if (!rd->filename)
-	{
-		free(rd);
-		return ;
-	}
-	rd->quoted = quoted;
-	if (!cmd->redirection)
-		cmd->redirection = rd;
-	else
-	{
-		tmp = cmd->redirection;
-		while (tmp->next)
-			tmp = tmp->next;
-		tmp->next = rd;
-	}
-}
-
-t_command	*handle_parse_error(
-		t_command *head, t_command *current, t_list *args)
-{
-	if (head)
-		free_commands(head);
-	if (current)
-		free_commands(current);
-	if (args)
-		ft_lstclear(&args, free);
-	return (NULL);
-}
-
 int	handle_parse_redirection(t_token *tok, t_command **current)
 {
-	int	quoted;
+	t_token	*cur;
+	t_token	*rem;
+	char	*name;
+	char	*tmp;
+	int		quoted;
 
-	if (tok->next)
+	if (!tok->next || tok->next->type == pipe_tok
+		|| (tok->next->type >= redirect_in && tok->next->type <= heredoc_tok))
 	{
-		quoted = 0;
-		if (tok->type == heredoc_tok)
-			quoted = tok->next->quoted;
-		add_redirection(*current, tok->type, tok->next->value, quoted);
-		return (0);
+		ft_printf_fd(2, "Syntax error: missing filename after redirection\n");
+		if (*current)
+			free_commands(*current);
+		*current = NULL;
+		return (1);
 	}
-	ft_printf_fd(2, "Syntax error: missing filename after redirection\n");
-	free_commands(*current);
-	*current = NULL;
-	return (1);
+	cur = tok->next;
+	name = ft_strdup(cur->value);
+	if (!name)
+		return (1);
+	while (cur->next
+		&& (cur->next->type == word || cur->next->type == single_quote
+			|| cur->next->type == double_quote || cur->next->type == env_var)
+		&& cur->next->space_before == 0)
+	{
+		tmp = ft_strjoin(name, cur->next->value);
+		free(name);
+		name = tmp;
+		rem = cur->next;
+		cur->next = rem->next;
+		free(rem->value);
+		free(rem);
+	}
+	quoted = (tok->type == heredoc_tok) ? tok->next->quoted : 0;
+	add_redirection(*current, tok->type, name, quoted);
+	free(name);
+	return (0);
 }
