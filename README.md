@@ -1,32 +1,28 @@
----
-
 # 🐚 Minishell — Tiny Bash (42 Project)
 
-Minishell C Unix Signals Readline
+Minishell • C • Unix • Signals • Readline
 
-This project implements a compact, Bash-like shell in **C** for the 42 core curriculum. It supports built-ins, pipelines, redirections (including heredoc), environment expansion, and correct signal/exit-status semantics.
+A compact, Bash-like shell in **C** for the 42 core curriculum. It supports builtins, pipelines, redirections (incl. heredoc), quote-aware expansion, and correct signal/exit-status semantics.
 
-✅ This repo implements the **mandatory** Minishell behavior (with a safe `*` wildcard bonus).
+✅ Implements **mandatory** behavior (with a minimal `*` wildcard bonus).  
 ❌ No logical operators (`&&`, `||`), subshells `( … )`, or assignment words (`X=1 cmd`) — by design.
 
 ---
 
 ## 📑 Table of Contents
 
-* [🧠 Introduction](#-introduction)
-* [✨ Features](#-features)
-* [📁 Project Structure](#-project-structure)
-* [🛠 Compilation](#-compilation)
-* [🚀 Usage](#-usage)
-* [🔍 How It Works](#-how-it-works)
-* [⚙️ Design Highlights](#️-design-highlights)
-* [🔄 Improvements Over Early Versions](#-improvements-over-early-versions)
-* [🧪 Testing & Debugging Notes](#-testing--debugging-notes)
-* [🧵 Test Scenarios](#-test-scenarios)
-* [📊 Advanced Testing Examples](#-advanced-testing-examples)
-* [⚠️ Caveats & Defense Notes](#️-caveats--defense-notes)
-* [🙌 Acknowledgments](#-acknowledgments)
-* [👤 Authors](#-authors)
+- [🧠 Introduction](#-introduction)
+- [✨ Features](#-features)
+- [📁 Project Structure](#-project-structure)
+- [🛠 Compilation](#-compilation)
+- [🚀 Usage](#-usage)
+- [🔍 How It Works](#-how-it-works)
+- [⚙️ Design Highlights](#️-design-highlights)
+- [🔄 Recent Changes](#-recent-changes)
+- [🧪 Testing](#-testing)
+- [🧵 Examples](#-examples)
+- [⚠️ Caveats & Defense Notes](#️-caveats--defense-notes)
+- [👤 Authors](#-authors)
 
 ---
 
@@ -34,75 +30,75 @@ This project implements a compact, Bash-like shell in **C** for the 42 core curr
 
 **Minishell** re-implements a subset of Bash with a focus on:
 
-* Correct **built-in** behavior in the parent process
-* Proper **redirections** (`<`, `>`, `>>`, `<<`)
-* **Pipelines** `|`
-* **Expansion** of `$VAR` and `$?` with quote rules
-* **Signals** at the prompt and for child processes
-* Accurate **exit statuses** (`126`, `127`, `130`, `131`)
+- Correct **builtins** in the parent process
+- Robust **redirections** (`<`, `>`, `>>`, `<<`)
+- **Pipelines** `|`
+- **Expansion** of `$VAR` and `$?` with proper quote rules
+- **Signals** (prompt, heredoc, children)
+- Accurate **exit statuses** (`126`, `127`, `130`, `131`)
 
-Goal: a clean, Norm-compliant, defense-ready shell.
+Goal: clean, Norm-compliant, defense-ready shell.
 
 ---
 
 ## ✨ Features
 
-* 🧩 **Built-ins** (parent, non-piped): `echo`, `cd`, `pwd`, `export`, `unset`, `env`, `exit`
-* 🚀 **External commands** via `fork` + `execve`
-* 🔁 **Pipes**: `cmd1 | cmd2 | ...`
-* 📥 **Redirections**: `<`, `>`, `>>`, `<<` (heredoc with Bash-like quote semantics)
-* 🔎 **Expansion**: `$VAR`, `$?`, quote-aware, **no extra spaces** (e.g., `echo "a"'b'c` → `abc`)
-* 🧵 **Signals**
+- 🧩 **Builtins** (in parent if not piped): `echo`, `cd`, `pwd`, `export`, `unset`, `env`, `exit`
+- 🚀 **External commands** via `fork` + `execve`
+- 🔁 **Pipes**: `cmd1 | cmd2 | ...`
+- 📥 **Redirections**: `<`, `>`, `>>`, `<<` (heredoc honors delimiter quotes)
+- 🔎 **Expansion**: `$VAR`, `$?`, quote-aware, **no extra spaces** (e.g., `echo "a"'b'c` → `abc`)
+- 🧵 **Signals**
+  - Prompt: `Ctrl-C` clears line + sets `$?=130`; `Ctrl-\` ignored
+  - Children: `Ctrl-C` → 130, `Ctrl-\` → 131
+  - Heredoc: `Ctrl-C` aborts immediately, sets `$?=130`, command is **not** executed
+- 🗂 **Env mgmt**: custom `char **env` copy, `export` sorted printing, safe `unset`
+- 🌟 **Bonus minimal**: `*` wildcard expansion (no hidden files unless pattern starts with `.`)
 
-  * Prompt: `Ctrl-C` clears line + sets `$?=130`; `Ctrl-\` ignored
-  * Children: `Ctrl-C` → `130`, `Ctrl-\` → `131`
-* 🗂 **Env mgmt**: custom `char **env` copy, `export` sorted listing, safe `unset`
-* 🌟 **Bonus kept minimal**: wildcard `*` expansion (no hidden files unless pattern starts with `.`)
-
-Out of scope (by choice): `&&`, `||`, subshells `()`, command substitution, assignment words (`X=1 cmd`).
+Out of scope: `&&`, `||`, subshells `()`, command substitution, assignment words.
 
 ---
 
 ## 📁 Project Structure
 
 ```
+
 .
-├── include/            # minishell.h, builtin.h, struct.h
-├── libft/              # 42 libft (used, not re-documented here)
+├── include/            # minishell.h, struct.h, builtin headers
+├── libft/              # 42 libft
 ├── src/
 │   ├── builtin/        # echo, cd, env, export, unset, pwd, exit
-│   ├── cmd/            # execute_commands.c (dispatcher)
-│   ├── env/            # ft_getenv.c (+ env helpers)
-│   ├── executor/       # redirection.c, heredoc.c, run_external_cmd.c
-│   │   └── pipes/      # execute_pipeline.c
+│   ├── executor/       # redirection.c, heredoc.c, run_external_cmd*.c
 │   ├── expand/         # expand.c, expand_utils.c, wildcard_*.c
 │   ├── initiation/     # tokenize.c, tokenizer_utils.c, parse_*.c, init_minishell.c
-│   ├── signal/         # signal.c (prompt vs child handlers)
+│   ├── signal/         # signal.c
 │   └── utils/          # free_*, helpers
-├── minishell.c         # main loop & readline
+├── minishell.c
 ├── Makefile
 └── README.md
-```
+
+````
 
 ---
 
 ## 🛠 Compilation
 
-**Submission flags (Norm-only):**
+Uses the usual 42 flags:
 
-```
+```make
 CFLAGS = -Wall -Wextra -Werror
-```
+````
 
-**Build:**
+Build:
 
 ```bash
 make         # build minishell
 make clean   # remove objects
 make fclean  # remove objects + binary
 make re      # full rebuild
-# Tip: make -n  # dry run (print commands without executing)
 ```
+
+> If your includes use `#include "../../include/minishell.h"`, the Makefile already adds `-Iinclude`. If you prefer `#include "minishell.h"` everywhere, keep sources at one depth or keep the `-Iinclude` and adjust headers accordingly.
 
 ---
 
@@ -123,79 +119,76 @@ minishell $> cat << EOF | grep test
 
 **Loop** → `readline` → tokenize → expand → parse → execute.
 
-* **Tokenizer** splits into `WORD`, `PIPE`, `REDIRECT_*`, `HEREDOC`, `SINGLE_QUOTE`, `DOUBLE_QUOTE`, `ENV_VAR`.
-* **Expander** resolves `$VAR`, `$?`; `"double quotes"` expand, `'single quotes'` don’t; adjacent tokens concatenate without extra spaces.
-* **Parser** builds a simple command list (`argv`, redirs, `next` for pipelines).
+* **Tokenizer** produces: `word`, `pipe_tok`, `redirect_in`, `redirect_out`,
+  `redirect_append`, `heredoc_tok`, `single_quote`, `double_quote`, `env_var`.
+* **Expander** resolves `$VAR`, `$?`; double quotes expand, single quotes don’t.
+  Adjacent tokens are concatenated if there wasn’t a space.
+* **Parser**
+
+  * Builds a linked list of commands (`argv`, redirs, `next` for pipes).
+  * Allows a command to start **with redirections** (e.g., `| >out cmd`).
+  * Concatenates a redirection filename from adjacent tokens with no space.
 * **Executor**
 
-  * Single command: built-ins in parent; external via child `fork`+`execve`
-  * Pipeline: one child per stage, statuses propagated
-  * **Redirections**: open/dup2 with clear errors; heredoc via a child process that uses default SIGINT so `Ctrl-C` aborts immediately and sets parent’s `$?=130` without executing the pending command.
+  * Non-piped builtins run in the parent.
+  * Pipelines spawn children; exit statuses propagated.
+  * **Heredoc** runs in a child with default `SIGINT` so `Ctrl-C` cancels cleanly.
 
 ---
 
 ## ⚙️ Design Highlights
 
-* 🍽 **Builtins in parent** (when not piped) so `PWD`, `OLDPWD`, `env`, and shell `exit_status` update correctly.
-* 🧱 **Clear 126/127 split**
+* 🧠 **Builtins in parent** (when not piped) so `PWD`, `env`, and `$?` update in-shell.
+* 🧱 **126/127 split**
 
-  * `127` = not found (also when `PATH` is unset)
-  * `126` = found but **not executable** or **is a directory**
-* 📜 **Heredoc semantics**
+  * `127` = not found (or `PATH` unset)
+  * `126` = found but not executable / is a directory
+* 📜 **Heredoc**
 
-  * Unquoted delimiter → expands `$VAR`, `$?`
-  * Quoted delimiter → **no expansion**
-  * `Ctrl-C` in heredoc → immediate abort, newline, `$?=130`, **no command run**
-* 🧼 **Memory safety**: no leaking/double-free on repeated `unset` / empty env mutations
-* 📏 **42 Norm**: ≤25 lines/function, ≤5 functions/file, headers/spacing fixed
-
----
-
-## 🔄 Improvements Over Early Versions
-
-* ✅ **Signals fixed**: prompt redraw on `Ctrl-C`; children return 130/131; heredoc `Ctrl-C` no longer needs extra Enter.
-* ✅ **Exit handling improved**: `exit` matches Bash (`2` for non-numeric, `1` for too many args without exiting, numeric mod 256).
-* ✅ **126/127 correctness**: permission/dir vs. not found.
-* ✅ **PATH unset**: external commands error with “No such file or directory”, status `127`.
-* ✅ **Redirections**: rightmost `>` wins (`echo hi > a > b` → `a` empty, `b` “hi”).
-* ✅ **Concatenation**: `"a"'b'c` → `abc` (no spurious spaces).
-* ✅ **Heredoc expansion**: quoted delimiter blocks expansion; unquoted expands `$?`/`$VAR`.
+  * Unquoted delimiter → expand `$VAR`/`$?`
+  * Quoted delimiter → no expansion
+  * `Ctrl-C` → newline, `$?=130`, skip command
+* 🧼 **Memory safety**: no leaks/double-frees on common flows
+* 📏 **42 Norm**: ≤25 lines/function, ≤5 functions/file, ≤4 args/function, ≤80 cols, tabs for indent
 
 ---
 
-## 🧪 Testing & Debugging Notes
+## 🔄 Recent Changes
 
-* Manual sessions cover signals, heredoc, pipelines, and redirections.
-* Light valgrind checks on common flows (no obvious leaks).
-* Wildcard kept minimal and isolated; it won’t break mandatory flows.
+* ✅ **Signals unified**: single global
+  `volatile sig_atomic_t g_sig` with `get_sigint_flag()` accessor.
+* ✅ **Parser**: allows redirection **immediately after `|`** (e.g., `| >out cmd`).
+* ✅ **Redirection filenames**: `handle_parse_redirection()` concatenates adjacent
+  tokens with `space_before == 0`, then splices extra nodes out.
+* ✅ **`$` handling**: inside double quotes, bare `$` stays literal; `echo "$"` prints `$`.
+* ✅ **Wildcard**: `*` expands using `opendir/readdir`; ignores hidden files unless pattern starts with `.`.
+* ✅ **Norm**: fixed tabs/spacing, argument counts, long functions split.
 
 ---
 
-## 🧵 Test Scenarios
+## 🧪 Testing
+
+* Tester used: **[LucasKuhn/minishell_tester](https://github.com/LucasKuhn/minishell_tester)**
+* Result: **146 / 146** ✅
+
+> Some tests display “⚠️ Broken pipe” differences in output text; they are not required by the subject, and exit codes/behaviors match.
+
+---
+
+## 🧵 Examples
 
 ```bash
 # Builtins
-echo hello                     # hello
-echo -n -n hey                 # hey (no newline)
-pwd                            # prints cwd
-cd /does/not/exist             # error, $?=1
+echo hello                 # hello
+pwd                        # prints cwd
+cd "$PWD" hi               # "too many arguments" (exit 1)
 
-# Env
-export X=
-export | grep '^declare -x X=' # shows X=
-unset X; unset X               # no crash
-
-# PATH unset
-unset PATH
-ls                             # "No such file or directory", $?=127
-export PATH=/bin:/usr/bin
-
-# Redirections
+# Redirections (rightmost wins)
+rm -f a b
 echo hi > a > b; wc -c a b
 # 0 a
 # 3 b
 # 3 total
-cat < a                        # (empty)
 
 # Heredoc – unquoted expands
 export A=42
@@ -210,13 +203,8 @@ $A literal
 EOF
 # $A literal
 
-# Heredoc – Ctrl-C
-cat << EOF
-^C
-echo $?                        # 130 (no command executed)
-
 # Pipes
-echo a | cat -e                # a$
+echo a | cat -e            # a$
 cat << EOF | grep hi | wc -l
 hi
 EOF
@@ -225,60 +213,21 @@ EOF
 
 ---
 
-## 📊 Advanced Testing Examples
-
-```bash
-# Check rightmost redirect behavior (b has the data, a is empty)
-rm -f a b
-echo hi > a > b
-wc -c a b
-
-# Verify $? after signals
-sleep 10  # press Ctrl-C
-echo $?
-
-# PATH restored; not found vs permission
-export PATH=/bin:/usr/bin
-nosuchcmd; echo $?
-chmod 000 ./minishell; ./minishell; echo $?   # 126 (permission)
-```
-
----
-
 ## ⚠️ Caveats & Defense Notes
 
-* **Not implemented (by choice):** `&&`, `||`, subshells `( … )`, command substitution, assignment words (`X=1 cmd`). Typing `X=` alone is treated as a command (not required by the subject).
-* **Heredoc & history:** Only the main prompt lines are added to history; heredoc lines are not (matches the scale’s expectation).
-* **`make -n` vs `make`:** `make -n` **prints** commands without executing (dry run), helpful to verify the Makefile.
-
-**Key defense answers**
-
-* Why builtins in parent? They must change shell state (env, cwd, exit).
-* 126 vs 127? `126` found but not executable / directory; `127` not found.
-* Heredoc quotes? Unquoted expands; quoted doesn’t; `Ctrl-C` → 130 and skip command.
-* Concatenation? `"a"'b'c` → `abc` (no spaces added by the lexer).
-
----
-
-## 🙌 Acknowledgments
-
-* Readline, GNU manpages, and 42 testers
-* 42 peers for feedback & debugging sessions
-* Minimal wildcard logic sourced from our own utils (kept separate from mandatory path)
+* **Not implemented:** `&&`, `||`, subshells `( … )`, command substitution, assignment words.
+* **Leading/trailing pipe**: `|`… or …`|` → syntax error, as in Bash.
+* **History:** only prompt lines go to history (heredoc lines don’t).
+* **Why builtins in parent?** They must mutate the shell state (env, cwd, exit).
+* **126 vs 127?** `126` = found but not executable/dir; `127` = not found.
 
 ---
 
 ## 👤 Authors
 
-**Christian (chrrodri)**
-
-* 42 Intra: `chrrodri`
-* GitHub: **@kitearuba**
-
-**bsamy**
-
-* 42 Intra: `bsamy`
+**Christian (chrrodri)** — 42 Intra: `chrrodri` — GitHub: **@kitearuba**
+**bsamy** — 42 Intra: `bsamy`
 
 ---
 
-*This project is for educational purposes at 42 School. Not intended for production.*
+*Educational project for 42 School.*
