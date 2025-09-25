@@ -32,18 +32,18 @@ DEPS            = $(HEADER) $(MAKEFILE)
 #                          Source Files and Objects                            #
 # **************************************************************************** #
 SRC = 	minishell.c \
-		$(SRC_DIR)/initiation/init_minishell.c \
-		$(SRC_DIR)/initiation/execute_minishell.c \
-		$(SRC_DIR)/initiation/tokenize.c \
-		$(SRC_DIR)/initiation/tokenizer_utils.c \
-		$(SRC_DIR)/initiation/tokenizer_redirects.c \
-		$(SRC_DIR)/initiation/parse_tokens.c \
-		$(SRC_DIR)/initiation/parse_utils.c \
-		$(SRC_DIR)/initiation/parse_utils2.c \
-		$(SRC_DIR)/initiation/parser_cmd.c \
-		$(SRC_DIR)/initiation/parser_cmd_utils.c \
-		$(SRC_DIR)/initiation/parser_checks.c \
-		$(SRC_DIR)/initiation/last_token_is_pipe.c \
+		$(SRC_DIR)/core/init_minishell.c \
+		$(SRC_DIR)/core/execute_minishell.c \
+		$(SRC_DIR)/lexer/tokenize.c \
+		$(SRC_DIR)/lexer/tokenizer_utils.c \
+		$(SRC_DIR)/lexer/tokenizer_redirects.c \
+		$(SRC_DIR)/parser/parse_tokens.c \
+		$(SRC_DIR)/parser/handle_parse_redirection.c \
+		$(SRC_DIR)/parser/parse_utils.c \
+		$(SRC_DIR)/parser/parser_cmd.c \
+		$(SRC_DIR)/parser/parser_cmd_utils.c \
+		$(SRC_DIR)/parser/parser_checks.c \
+		$(SRC_DIR)/parser/last_token_is_pipe.c \
 		$(SRC_DIR)/expand/expand.c \
 		$(SRC_DIR)/expand/expand_utils.c \
 		$(SRC_DIR)/expand/expand_wildcard.c \
@@ -58,15 +58,15 @@ SRC = 	minishell.c \
 		$(SRC_DIR)/utils/input_utils.c \
 		$(SRC_DIR)/cmd/built_in.c \
 		$(SRC_DIR)/cmd/execute_commands.c \
-		$(SRC_DIR)/executor/get_cmd_path.c \
-		$(SRC_DIR)/executor/execve.c \
-		$(SRC_DIR)/executor/run_external_cmd.c \
-		$(SRC_DIR)/executor/run_external_cmd_utils.c \
-		$(SRC_DIR)/executor/redirection.c \
-		$(SRC_DIR)/executor/heredoc.c \
-		$(SRC_DIR)/executor/heredoc_utils.c \
-		$(SRC_DIR)/executor/pipes/execute_pipeline.c \
-		$(SRC_DIR)/executor/pipes/create_pipe.c \
+		$(SRC_DIR)/execution/get_cmd_path.c \
+		$(SRC_DIR)/execution/execve.c \
+		$(SRC_DIR)/execution/run_external_cmd.c \
+		$(SRC_DIR)/execution/run_external_cmd_utils.c \
+		$(SRC_DIR)/execution/redirection.c \
+		$(SRC_DIR)/execution/heredoc.c \
+		$(SRC_DIR)/execution/heredoc_utils.c \
+		$(SRC_DIR)/execution/pipes/execute_pipeline.c \
+		$(SRC_DIR)/execution/pipes/create_pipe.c \
         $(SRC_DIR)/builtin/ft_echo.c \
         $(SRC_DIR)/builtin/ft_cd.c \
         $(SRC_DIR)/builtin/ft_pwd.c \
