@@ -61,19 +61,50 @@ Out of scope: `&&`, `||`, subshells `()`, command substitution, assignment words
 
 ## 📁 Project Structure
 
+
 ```
 
 .
-├── include/            # minishell.h, struct.h, builtin headers
+├── include/            # minishell.h, builtin.h, struct.h
 ├── libft/              # 42 libft
+├── minishell.c         # program entry (delegates to core/)
 ├── src/
+│   ├── core/           # shell lifecycle (init + REPL loop)
+│   │   ├── init_minishell.c
+│   │   └── execute_minishell.c
+│   ├── lexer/          # tokenization
+│   │   ├── tokenize.c
+│   │   ├── tokenizer_utils.c
+│   │   └── tokenizer_redirects.c
+│   ├── parser/         # tokens → command list
+│   │   ├── parse_tokens.c
+│   │   ├── parse_utils.c
+│   │   ├── parser_cmd.c
+│   │   ├── parser_cmd_utils.c
+│   │   ├── parser_checks.c
+│   │   ├── handle_parse_redirection.c
+│   │   └── last_token_is_pipe.c
+│   ├── expand/         # $VAR, $? and wildcard expansion
+│   │   ├── expand.c
+│   │   ├── expand_utils.c
+│   │   ├── expand_wildcard.c
+│   │   ├── wildcard_utils.c
+│   │   └── wildcard_utils_2.c
+│   ├── execution/      # run commands, redirs, pipes, heredoc
+│   │   ├── execve.c
+│   │   ├── get_cmd_path.c
+│   │   ├── redirection.c
+│   │   ├── heredoc.c
+│   │   ├── heredoc_utils.c
+│   │   ├── run_external_cmd.c
+│   │   ├── run_external_cmd_utils.c
+│   │   └── pipes/
+│   │       ├── create_pipe.c
+│   │       └── execute_pipeline.c
 │   ├── builtin/        # echo, cd, env, export, unset, pwd, exit
-│   ├── executor/       # redirection.c, heredoc.c, run_external_cmd*.c
-│   ├── expand/         # expand.c, expand_utils.c, wildcard_*.c
-│   ├── initiation/     # tokenize.c, tokenizer_utils.c, parse_*.c, init_minishell.c
-│   ├── signal/         # signal.c
-│   └── utils/          # free_*, helpers
-├── minishell.c
+│   ├── env/            # env helpers (ft_getenv, env_set, …)
+│   ├── signal/         # prompt + child signal handling
+│   └── utils/          # frees, misc helpers
 ├── Makefile
 └── README.md
 
