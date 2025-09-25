@@ -1,12 +1,12 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   parse_checks.c                                     :+:      :+:    :+:   */
+/*   parser_checks.c                                    :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: chrrodri <chrrodri@student.42barcelona.co  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/01 14:15:32 by chrrodri          #+#    #+#             */
-/*   Updated: 2025/07/18 23:15:48 by chrrodri         ###   ########.fr       */
+/*   Updated: 2025/09/25 12:24:59 by chrrodri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -68,14 +68,6 @@ int	check_initial_errors(t_token *tok)
 		ft_printf_fd(2, "Syntax error: unexpected token `|'\n");
 		return (1);
 	}
-	/*
-	if (tok->type >= redirect_in && tok->type <= heredoc_tok)
-	{
-		ft_printf_fd(2,
-			"Syntax error: unexpected redirection with no command\n");
-		return (1);
-	}
-	*/
 	return (0);
 }
 

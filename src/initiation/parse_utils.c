@@ -6,54 +6,47 @@
 /*   By: chrrodri <chrrodri@student.42barcelona.co  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/29 14:15:32 by chrrodri          #+#    #+#             */
-/*   Updated: 2025/09/25 11:07:44 by chrrodri         ###   ########.fr       */
+/*   Updated: 2025/09/25 12:14:59 by chrrodri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minishell.h"
 
-t_command	*new_command(void)
+/* filename token types allowed to be glued without space */
+static int	is_filename_token(t_token *t)
 {
-	t_command	*cmd;
-
-	cmd = malloc(sizeof(t_command));
-	if (!cmd)
-		return (NULL);
-	ft_memset(cmd, 0, sizeof(t_command));
-	return (cmd);
+	if (!t)
+		return (0);
+	if (t->type == word || t->type == single_quote
+		|| t->type == double_quote || t->type == env_var)
+		return (1);
+	return (0);
 }
 
-t_command	*last_command(t_command *head)
+/* check syntax: need a filename token after a redirection */
+static int	missing_redir_filename(t_token *tok)
 {
-	while (head && head->next)
-		head = head->next;
-	return (head);
+	if (!tok->next)
+		return (1);
+	if (tok->next->type == pipe_tok)
+		return (1);
+	if (tok->next->type >= redirect_in && tok->next->type <= heredoc_tok)
+		return (1);
+	return (0);
 }
 
-int	handle_parse_redirection(t_token *tok, t_command **current)
+/* build filename from tok->next and following glued tokens; consumes 
+ * next nodes */
+static char	*collect_filename(t_token *cur)
 {
-	t_token	*cur;
-	t_token	*rem;
 	char	*name;
 	char	*tmp;
-	int		quoted;
+	t_token	*rem;
 
-	if (!tok->next || tok->next->type == pipe_tok
-		|| (tok->next->type >= redirect_in && tok->next->type <= heredoc_tok))
-	{
-		ft_printf_fd(2, "Syntax error: missing filename after redirection\n");
-		if (*current)
-			free_commands(*current);
-		*current = NULL;
-		return (1);
-	}
-	cur = tok->next;
 	name = ft_strdup(cur->value);
 	if (!name)
-		return (1);
-	while (cur->next
-		&& (cur->next->type == word || cur->next->type == single_quote
-			|| cur->next->type == double_quote || cur->next->type == env_var)
+		return (NULL);
+	while (cur->next && is_filename_token(cur->next)
 		&& cur->next->space_before == 0)
 	{
 		tmp = ft_strjoin(name, cur->next->value);
@@ -64,7 +57,30 @@ int	handle_parse_redirection(t_token *tok, t_command **current)
 		free(rem->value);
 		free(rem);
 	}
-	quoted = (tok->type == heredoc_tok) ? tok->next->quoted : 0;
+	return (name);
+}
+
+int	handle_parse_redirection(t_token *tok, t_command **current)
+{
+	t_token	*cur;
+	char	*name;
+	int		quoted;
+
+	if (missing_redir_filename(tok))
+	{
+		ft_printf_fd(2, "Syntax error: missing filename after redirection\n");
+		if (*current)
+			free_commands(*current);
+		*current = NULL;
+		return (1);
+	}
+	cur = tok->next;
+	name = collect_filename(cur);
+	if (!name)
+		return (1);
+	quoted = 0;
+	if (tok->type == heredoc_tok)
+		quoted = cur->quoted;
 	add_redirection(*current, tok->type, name, quoted);
 	free(name);
 	return (0);

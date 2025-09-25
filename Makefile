@@ -40,6 +40,7 @@ SRC = 	minishell.c \
 		$(SRC_DIR)/initiation/parse_tokens.c \
 		$(SRC_DIR)/initiation/parse_utils.c \
 		$(SRC_DIR)/initiation/parse_utils2.c \
+		$(SRC_DIR)/initiation/parser_cmd.c \
 		$(SRC_DIR)/initiation/parser_cmd_utils.c \
 		$(SRC_DIR)/initiation/parser_checks.c \
 		$(SRC_DIR)/initiation/last_token_is_pipe.c \

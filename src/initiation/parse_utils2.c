@@ -6,7 +6,7 @@
 /*   By: chrrodri <chrrodri@student.42barcelona.co  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/07 01:35:00 by chrrodri          #+#    #+#             */
-/*   Updated: 2025/09/25 11:06:53 by chrrodri         ###   ########.fr       */
+/*   Updated: 2025/09/25 12:24:20 by chrrodri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -74,8 +74,10 @@ void	add_token_argument(t_token *tok, t_list **args)
 
 int	handle_redirection(t_token *tok, t_command **current, t_list **args)
 {
+	int	quoted;
+
 	(void)args;
-	if (tok->next)
+	if (!tok->next)
 	{
 		ft_printf_fd(2, "Syntax error: missing filename after redirection\n");
 		if (*current)
@@ -83,12 +85,10 @@ int	handle_redirection(t_token *tok, t_command **current, t_list **args)
 		*current = NULL;
 		return (1);
 	}
-	add_redirection(
-		*current,
-		tok->type,
-		tok->next->value,
-		(tok->type == heredoc_tok) ? tok->next->quoted : 0
-	);
+	quoted = 0;
+	if (tok->type == heredoc_tok)
+		quoted = tok->next->quoted;
+	add_redirection(*current, tok->type, tok->next->value, quoted);
 	return (0);
 }
 
