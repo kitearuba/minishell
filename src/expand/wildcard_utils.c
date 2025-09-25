@@ -6,18 +6,33 @@
 /*   By: chrrodri <chrrodri@student.42barcelona.co  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/20 15:15:58 by chrrodri          #+#    #+#             */
-/*   Updated: 2025/09/23 22:39:32 by chrrodri         ###   ########.fr       */
+/*   Updated: 2025/09/25 15:31:01 by chrrodri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../../include/minishell.h"
 
+/* -------------------------------------------------------------------------- */
+/* Wildcard helpers: generate a sorted token list of matches for a pattern.   */
+/* Hidden files are included only when the pattern begins with '.'.           */
+/* -------------------------------------------------------------------------- */
+
+/*
+** lexcmp
+** ------
+** ASCII lexicographic compare wrapper (uses ft_strcmp).
+*/
 static int	lexcmp(const char *a, const char *b)
 {
 	return (ft_strcmp(a, b));
 }
 
-/* Insert node into list keeping ASCII-lexicographic order. */
+/*
+** insert_sorted
+** -------------
+** Insert 'node' into the singly-linked token list pointed by *head
+** preserving ASCII lexicographic order by token->value.
+*/
 static void	insert_sorted(t_token **head, t_token *node)
 {
 	t_token	*prev;
@@ -40,7 +55,12 @@ static void	insert_sorted(t_token **head, t_token *node)
 	node->next = cur;
 }
 
-/* Create token for name, set space_before, and insert sorted. */
+/*
+** append_name
+** -----------
+** Create a WORD token for 'name', set space_before to 'sb', and insert it
+** into the list in sorted order. No-op on allocation failure.
+*/
 static void	append_name(t_token **head, const char *name, int sb)
 {
 	t_token	*tok;
@@ -52,7 +72,16 @@ static void	append_name(t_token **head, const char *name, int sb)
 	insert_sorted(head, tok);
 }
 
-/* Build a sorted list of matches; first keeps original space_before. */
+/*
+** handle_match_loop
+** -----------------
+** Iterate directory entries from 'dir', and for each entry that:
+**   - is not hidden unless pattern starts with '.'
+**   - matches the glob 'pattern' (match_pattern)
+** append a token with correct space_before:
+**   - first match keeps original space_before
+**   - subsequent matches use space_before = 1
+*/
 static void	handle_match_loop(DIR *dir, const char *pattern,
 		t_token **head, int space_before)
 {
@@ -81,7 +110,14 @@ static void	handle_match_loop(DIR *dir, const char *pattern,
 	}
 }
 
-/* Public API: expand; if no match, return literal pattern as a WORD token. */
+/*
+** wildcard_match
+** --------------
+** Return a newly-allocated, sorted list of WORD tokens matching 'pattern'.
+** If no matches are found, return a single WORD token containing the literal
+** pattern (so the caller can keep it untouched).
+** space_before the first emitted token is set to the caller-provided flag.
+*/
 t_token	*wildcard_match(const char *pattern, int space_before)
 {
 	t_token	*head;

@@ -6,13 +6,25 @@
 /*   By: chrrodri <chrrodri@student.42barcelona.co  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/18 14:15:32 by chrrodri          #+#    #+#             */
-/*   Updated: 2025/09/19 18:47:50 by chrrodri         ###   ########.fr       */
+/*   Updated: 2025/09/25 15:29:54 by chrrodri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minishell.h"
 
-/* tiny helper to set space_before and append safely */
+/* -------------------------------------------------------------------------- */
+/* Tokenize: split a raw input line into a linked list of t_token nodes.      */
+/* -------------------------------------------------------------------------- */
+
+/*
+** push_tok
+** --------
+** Set the token's space_before flag and append it to the list (NULL-safe).
+** Parameters:
+**   toks  - pointer to the head of the token list
+**   tok   - token to append; if NULL, does nothing
+**   space - 1 if a space preceded this token, 0 otherwise
+*/
 static void	push_tok(t_token **toks, t_token *tok, int space)
 {
 	if (!tok)
@@ -21,6 +33,14 @@ static void	push_tok(t_token **toks, t_token *tok, int space)
 	add_token(toks, tok);
 }
 
+/*
+** handle_quotes
+** -------------
+** Extract a single- or double-quoted chunk starting at in[*i], create a WORD
+** token (quoted flag = 1 for single quotes, 2 for double quotes), push it, and
+** advance *i to the first char after the closing quote.
+** Returns 1 on success, 0 on unmatched quote (and prints an error elsewhere).
+*/
 int	handle_quotes(const char *in, t_token **toks, size_t *i, int space)
 {
 	char	*quoted;
@@ -40,6 +60,15 @@ int	handle_quotes(const char *in, t_token **toks, size_t *i, int space)
 	return (1);
 }
 
+/*
+** handle_env_var
+** --------------
+** Parse an env-var token starting at the '$' at index i.
+**   - "$?"     => ENV_VAR of length 2
+**   - "$NAME"  => ENV_VAR spanning NAME (alnum or '_')
+**   - "$" not followed by NAME => literal "$" as a WORD
+** Pushes the token and returns the new index after the parsed segment.
+*/
 size_t	handle_env_var(const char *in, t_token **toks, size_t i, int space)
 {
 	size_t	start;
@@ -68,6 +97,17 @@ size_t	handle_env_var(const char *in, t_token **toks, size_t i, int space)
 	return (i);
 }
 
+/*
+** dispatch_token
+** --------------
+** Route the current char to the right tokenizer:
+**   '|' -> handle_pipe
+**   '<' or '>' -> append_redirect_token
+**   '\'' or '"' -> handle_quotes
+**   '$' -> handle_env_var
+**   default -> handle_word
+** Returns 1 on success, 0 on fatal error (e.g., unmatched quote).
+*/
 static int	dispatch_token(const char *in, t_token **toks, size_t *i, int space)
 {
 	if (in[*i] == '|')
@@ -90,6 +130,13 @@ static int	dispatch_token(const char *in, t_token **toks, size_t *i, int space)
 	return (1);
 }
 
+/*
+** tokenize_input
+** --------------
+** Main entry point for lexing. Skips spaces, sets space_before per token, and
+** builds the full token list for the input string. Returns the head of the
+** list (or NULL on fatal error such as unmatched quotes).
+*/
 t_token	*tokenize_input(const char *input)
 {
 	t_token	*tokens;

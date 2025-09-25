@@ -6,12 +6,26 @@
 /*   By: chrrodri <chrrodri@student.42barcelona.co  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/04 14:10:00 by chrrodri          #+#    #+#             */
-/*   Updated: 2025/09/25 12:25:56 by chrrodri         ###   ########.fr       */
+/*   Updated: 2025/09/25 15:18:54 by chrrodri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../../include/minishell.h"
 
+/* -------------------------------------------------------------------------- */
+/* Variable expansion & quote-aware rewrites                                  */
+/* -------------------------------------------------------------------------- */
+
+/*
+** extract_var_value
+** -----------------
+** Given *s positioned at the first char after a '$', extract the variable
+** reference and return a freshly allocated string with its value:
+**   - '?'  -> bash->exit_status as string, advances *s by 1
+**   - NAME -> value of NAME (alnum or '_'), advances *s by |NAME|
+**   - ''   -> literal "$" when no valid name follows
+** Returns: malloc'ed value (caller owns).
+*/
 static char	*extract_var_value(char **s, t_bash *bash)
 {
 	int		len;
@@ -35,6 +49,12 @@ static char	*extract_var_value(char **s, t_bash *bash)
 	return (val);
 }
 
+/*
+** expand_in_double_quotes
+** -----------------------
+** Expand a str that was originally inside double quotes. Performs $-expansion
+** but preserves all other characters verbatim. Returns a malloc'ed result.
+*/
 static char	*expand_in_double_quotes(const char *str, t_bash *bash)
 {
 	char	*res;
@@ -64,6 +84,14 @@ static char	*expand_in_double_quotes(const char *str, t_bash *bash)
 	return (res);
 }
 
+/*
+** expand_env_var
+** --------------
+** Expand a single ENV_VAR token:
+**   - If unquoted and expansion yields empty string, remove the token.
+**   - Otherwise replace token->value with expanded content and set type=word.
+** On removal, relinks the list (using head/prev/cur).
+*/
 void	expand_env_var(t_token **head, t_token **prev, t_token **cur, t_bash *b)
 {
 	t_token	*next;
@@ -92,6 +120,14 @@ void	expand_env_var(t_token **head, t_token **prev, t_token **cur, t_bash *b)
 	*cur = (*cur)->next;
 }
 
+/*
+** expand_one
+** ----------
+** Expand one token according to its type/quote:
+**   - ENV_VAR -> expand_env_var
+**   - quoted==2 (double quotes) -> expand inside the string
+** Advances *cur (and updates *prev).
+*/
 void	expand_one(t_token **head, t_token **prev, t_token **cur, t_bash *b)
 {
 	char	*exp;
@@ -115,6 +151,11 @@ void	expand_one(t_token **head, t_token **prev, t_token **cur, t_bash *b)
 	*cur = (*cur)->next;
 }
 
+/*
+** expand_env_vars
+** ---------------
+** Walk the token list and apply the expansion rules to every token.
+*/
 void	expand_env_vars(t_token **tokens, t_bash *bash)
 {
 	t_token	*prev;

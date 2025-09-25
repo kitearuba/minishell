@@ -6,12 +6,21 @@
 /*   By: chrrodri <chrrodri@student.42barcelona.co  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/17 10:13:31 by chrrodri          #+#    #+#             */
-/*   Updated: 2025/09/19 14:14:44 by chrrodri         ###   ########.fr       */
+/*   Updated: 2025/09/25 15:16:28 by chrrodri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../../include/minishell.h"
+#include "minishell.h"
 
+/* -------------------------------------------------------------------------- */
+/* Expand a single $KEY or $? token while scanning a heredoc line             */
+/* -------------------------------------------------------------------------- */
+/*
+** hd_expand_key
+** -------------
+** Reads a variable name starting at s[*i]; updates *i past the token.
+** Returns a malloc'ed expansion string ("" if missing), or "$" if no key chars.
+*/
 char	*hd_expand_key(const char *s, size_t *i, t_bash *bash)
 {
 	size_t	start;
@@ -39,6 +48,8 @@ char	*hd_expand_key(const char *s, size_t *i, t_bash *bash)
 	return (val);
 }
 
+/* Append s[start:end] to *res (realloc via append_and_free);
+ * return 0/1 on ok/error. */
 static int	append_chunk(char **res, const char *s, size_t start, size_t end)
 {
 	char	*tmp;
@@ -50,6 +61,7 @@ static int	append_chunk(char **res, const char *s, size_t start, size_t end)
 	return (0);
 }
 
+/* Append expanded token at s[*i] (skipping '$' and reading key); return 0/1. */
 static int	append_expansion(char **res, const char *s, size_t *i, t_bash *bash)
 {
 	char	*tmp;
@@ -62,6 +74,15 @@ static int	append_expansion(char **res, const char *s, size_t *i, t_bash *bash)
 	return (0);
 }
 
+/* -------------------------------------------------------------------------- */
+/* Expand a full heredoc line: $VAR and $? only (no quotes handling here)     */
+/* -------------------------------------------------------------------------- */
+/*
+** hd_expand_line
+** --------------
+** Walk through 's' and expand $-expressions using the current environment.
+** Returns a newly-allocated expanded string, or NULL on allocation error.
+*/
 char	*hd_expand_line(const char *s, t_bash *bash)
 {
 	char	*res;

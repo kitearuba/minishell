@@ -10,8 +10,19 @@
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../../include/minishell.h"
+#include "minishell.h"
 
+/* -------------------------------------------------------------------------- */
+/* Test for -n (accepts -n, -nnn, ...)                                        */
+/* -------------------------------------------------------------------------- */
+/*
+** is_n_flag (file-local)
+** ----------------------
+** Returns 1 if arg is '-n' with any number of trailing 'n's, else 0.
+**
+** Params:  arg : candidate flag string
+** Return:  int
+*/
 static int	is_n_flag(char *arg)
 {
 	int	i;
@@ -24,6 +35,19 @@ static int	is_n_flag(char *arg)
 	return (arg[i] == '\0');
 }
 
+/* -------------------------------------------------------------------------- */
+/* builtin: echo                                                              */
+/* -------------------------------------------------------------------------- */
+/*
+** ft_echo
+** -------
+** Prints args separated by a single space. If one or more -n flags are
+** present, suppresses the trailing newline.
+**
+** Params:  argv : char**  (argv[0]=="echo")
+**          bash : t_bash* (sets exit_status=0)
+** Return:  int  always 0
+*/
 int	ft_echo(char **argv, t_bash *bash)
 {
 	int	i;

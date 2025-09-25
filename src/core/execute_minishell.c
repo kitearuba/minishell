@@ -6,12 +6,19 @@
 /*   By: chrrodri <chrrodri@student.42barcelona.co  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/19 17:59:43 by chrrodri          #+#    #+#             */
-/*   Updated: 2025/09/19 15:17:08 by chrrodri         ###   ########.fr       */
+/*   Updated: 2025/09/25 15:11:09 by chrrodri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../../include/minishell.h"
+#include "minishell.h"
 
+/*
+** exit_failure
+** ------------
+** Used on startup failure before entering the prompt loop:
+** print required "minishell: exit" and free duplicated env.
+** Return 1 so main can propagate failure.
+*/
 int	exit_failure(t_bash *bash)
 {
 	write(2, "minishell: exit\n", 16);
@@ -19,6 +26,14 @@ int	exit_failure(t_bash *bash)
 	return (1);
 }
 
+/*
+** parse_and_execute
+** -----------------
+** One-shot pipeline for a single input line:
+**   tokenize -> expand env -> expand wildcards -> parse -> execute
+** Frees temporary token/command lists locally.
+** On parse failure, emit a friendly diagnostic and leave exit_status as-is.
+*/
 static void	parse_and_execute(char *line, t_bash *bash)
 {
 	bash->tokens = tokenize_input(line);
@@ -39,6 +54,13 @@ static void	parse_and_execute(char *line, t_bash *bash)
 	bash->tokens = NULL;
 }
 
+/*
+** process_input
+** -------------
+** Safety wrapper before parsing a fresh line:
+**   - ensure any previous token/command lists are freed
+**   - run parse+execute for the new line
+*/
 void	process_input(char *line, t_bash *bash)
 {
 	if (bash->tokens)
@@ -54,7 +76,15 @@ void	process_input(char *line, t_bash *bash)
 	parse_and_execute(line, bash);
 }
 
-/* Handle SIGINT-at-prompt and empty/space-only lines */
+/*
+** handle_line
+** -----------
+** Prompt-level line handler:
+**   - If SIGINT was caught at the prompt, set $?=130 and clear the flag.
+**     Empty lines after Ctrl-C are ignored (bash-like behavior).
+**   - Ignore empty/space-only lines.
+**   - Otherwise add to history and process.
+*/
 static void	handle_line(char *line, t_bash *bash)
 {
 	if (*get_sigint_flag())
@@ -70,6 +100,15 @@ static void	handle_line(char *line, t_bash *bash)
 	process_input(line, bash);
 }
 
+/*
+** minishell_loop
+** --------------
+** Interactive loop:
+**   - Install prompt signal handlers
+**   - Keep saved copies of STDIN/STDOUT (restored each iteration)
+**   - Read with readline; on EOF (^D) print "exit" and cleanly terminate
+**   - Delegate the actual work to handle_line() per iteration
+*/
 void	minishell_loop(t_bash *bash)
 {
 	char	*line;

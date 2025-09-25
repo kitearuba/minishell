@@ -6,12 +6,24 @@
 /*   By: chrrodri <chrrodri@student.42barcelona.co  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/07 09:15:00 by chrrodri          #+#    #+#             */
-/*   Updated: 2025/08/08 03:18:00 by chrrodri         ###   ########.fr       */
+/*   Updated: 2025/09/25 15:06:30 by chrrodri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../../include/minishell.h"
+#include "minishell.h"
 
+/* -------------------------------------------------------------------------- */
+/* builtin: env                                                               */
+/* -------------------------------------------------------------------------- */
+/*
+** ft_env
+** ------
+** Prints environment entries that contain '=' exactly as "KEY=VAL".
+**
+** Params:  argv : char** (ignored)
+**          bash : t_bash*
+** Return:  int  0
+*/
 int	ft_env(char **argv, t_bash *bash)
 {
 	int	i;

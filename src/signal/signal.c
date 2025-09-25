@@ -6,20 +6,45 @@
 /*   By: chrrodri <chrrodri@student.42barcelona.co  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/21 20:30:00 by chrrodri          #+#    #+#             */
-/*   Updated: 2025/09/23 22:56:35 by chrrodri         ###   ########.fr       */
+/*   Updated: 2025/09/25 15:24:42 by chrrodri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../../include/minishell.h"
+#include "minishell.h"
 
 volatile sig_atomic_t	g_sig = 0;
 
+/* -------------------------------------------------------------------------- */
+/* Global SIGINT flag accessor (set by prompt handler)                        */
+/* -------------------------------------------------------------------------- */
+/*
+** get_sigint_flag
+** ---------------
+** Returns the address of the global sigint flag. The main loop checks and
+** clears this to translate Ctrl-C at the prompt into $? = 130 behavior.
+**
+** Returns:
+**   volatile sig_atomic_t*  - pointer to global flag
+*/
 volatile sig_atomic_t	*get_sigint_flag(void)
 {
 	return (&g_sig);
 }
 
-/* Prompt: redraw line (bash-like), SA_RESTART on */
+/* -------------------------------------------------------------------------- */
+/* Prompt SIGINT handler (Ctrl-C) — bash-like behavior                        */
+/* -------------------------------------------------------------------------- */
+/*
+** prompt_sigint (file-local)
+** --------------------------
+** Async handler for SIGINT while waiting at the prompt:
+**   - Set global flag (read by main loop)
+**   - Print a newline
+**   - Clear current input line and redisplay prompt (readline helpers)
+**
+** Notes:
+** - Uses only async-signal-safe calls plus readline's helpers (see review note).
+*/
 static void	prompt_sigint(int signum)
 {
 	(void)signum;
@@ -30,6 +55,16 @@ static void	prompt_sigint(int signum)
 	rl_redisplay();
 }
 
+/* -------------------------------------------------------------------------- */
+/* Install prompt-time signal disposition                                     */
+/* -------------------------------------------------------------------------- */
+/*
+** setup_signal_handlers
+** ---------------------
+** For the interactive prompt, install:
+**   - SIGINT -> prompt_sigint with SA_RESTART (readline will retry syscalls)
+**   - SIGQUIT -> ignored (like bash)
+*/
 void	setup_signal_handlers(void)
 {
 	struct sigaction	sa;
@@ -42,6 +77,15 @@ void	setup_signal_handlers(void)
 	signal(SIGQUIT, SIG_IGN);
 }
 
+/* -------------------------------------------------------------------------- */
+/* Child process signal disposition                                           */
+/* -------------------------------------------------------------------------- */
+/*
+** setup_child_signals
+** -------------------
+** For child processes just before execve:
+**   - SIGINT/SIGQUIT -> default handling (so ^C/^\\ are delivered to the child)
+*/
 void	setup_child_signals(void)
 {
 	signal(SIGINT, SIG_DFL);

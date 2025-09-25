@@ -6,12 +6,23 @@
 /*   By: chrrodri <chrrodri@student.42barcelona.co  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/07 03:30:00 by chrrodri          #+#    #+#             */
-/*   Updated: 2025/08/07 03:30:00 by chrrodri         ###   ########.fr       */
+/*   Updated: 2025/09/25 15:05:23 by chrrodri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../../include/minishell.h"
+#include "minishell.h"
 
+/* -------------------------------------------------------------------------- */
+/* Validate shell identifier: [A-Za-z_][A-Za-z0-9_]*                          */
+/* -------------------------------------------------------------------------- */
+/*
+** is_valid_identifier
+** -------------------
+** Returns 1 if `s` is a valid identifier for export/unset, else 0.
+**
+** Params:  s : candidate string
+** Return:  int (1 valid, 0 invalid)
+*/
 int	is_valid_identifier(const char *s)
 {
 	int	i;
@@ -30,6 +41,17 @@ int	is_valid_identifier(const char *s)
 	return (1);
 }
 
+/* -------------------------------------------------------------------------- */
+/* Deep-copy a NULL-terminated environment vector                             */
+/* -------------------------------------------------------------------------- */
+/*
+** copy_env
+** --------
+** Allocates and duplicates each "KEY=VAL" entry from `env`.
+**
+** Params:  env : char** (NULL-terminated)
+** Return:  char** newly allocated copy (or NULL on alloc failure)
+*/
 char	**copy_env(char **env)
 {
 	int		count;

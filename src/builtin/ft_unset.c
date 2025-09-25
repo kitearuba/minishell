@@ -6,15 +6,16 @@
 /*   By: chrrodri <chrrodri@student.42barcelona.co  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/07 01:34:05 by chrrodri          #+#    #+#             */
-/*   Updated: 2025/09/19 13:00:33 by chrrodri         ###   ########.fr       */
+/*   Updated: 2025/09/25 15:33:19 by chrrodri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../../include/minishell.h"
+#include "minishell.h"
 
-/*
-** Return the index of KEY in env (matches "KEY=" prefix), or -1 if missing.
-*/
+/* -------------------------------------------------------------------------- */
+/* Find index of KEY in env by matching "KEY=" prefix                         */
+/* Return the index of KEY in env (matches "KEY=" prefix), or -1 if missing.  */
+/* -------------------------------------------------------------------------- */
 static int	env_index_of(char **env, const char *key)
 {
 	size_t	klen;
@@ -33,10 +34,10 @@ static int	env_index_of(char **env, const char *key)
 	return (-1);
 }
 
-/*
-** Copy all entries from src to dst, skipping index `skip`.
-** Also frees src[skip] if it exists.
-*/
+/* -------------------------------------------------------------------------- */
+/* Copy all entries from src to dst, skipping index `skip`.                   */
+/* Also frees src[skip] if it exists.                     .                   */
+/* -------------------------------------------------------------------------- */
 static void	copy_except(char **src, char **dst, int skip)
 {
 	int	i;
@@ -55,9 +56,15 @@ static void	copy_except(char **src, char **dst, int skip)
 	dst[j] = NULL;
 }
 
+/* -------------------------------------------------------------------------- */
+/* Remove env[idx] from bash->env (by rebuilding the array without it)        */
+/* -------------------------------------------------------------------------- */
 /*
-** Remove env[idx] from bash->env by rebuilding the array without it.
-** Returns 0 on success, 1 on malloc failure. No-op if idx < 0.
+** env_remove_at (file-local)
+** --------------------------
+** Rebuilds environment without the `idx` entry.
+**
+** Return: int 0 on success (or idx<0), 1 on malloc failure
 */
 static int	env_remove_at(t_bash *bash, int idx)
 {
@@ -78,9 +85,15 @@ static int	env_remove_at(t_bash *bash, int idx)
 	return (0);
 }
 
+/* -------------------------------------------------------------------------- */
+/* Unset a single key with print bash-like error on identifier validation     */
+/* -------------------------------------------------------------------------- */
 /*
-** Unset a single key; print bash-like error on invalid identifier.
-** Returns 1 on error, 0 otherwise.
+** unset_one (file-local)
+** ----------------------
+** Validates KEY; prints bash-like error if invalid. Removes from env if exists.
+**
+** Return: int 0 on success/no-op, 1 on error
 */
 static int	unset_one(t_bash *bash, const char *key)
 {
@@ -99,11 +112,20 @@ static int	unset_one(t_bash *bash, const char *key)
 	return (0);
 }
 
+/* -------------------------------------------------------------------------- */
+/* builtin: unset                                                             */
+/* -------------------------------------------------------------------------- */
 /*
-** minishell builtin: unset [name ...]
-** - No options.
-** - Invalid identifiers print error to stderr and set exit status to 1.
+** ft_unset
+** -------
+** Unsets each provided identifier. Invalid names print an error; overall
+** status is 1 if any unset failed/invalid, else 0.
+*** - Invalid identifiers print error to stderr and set exit status to 1.
 ** - Missing names are not errors.
+**
+** Params:  argv : char**  (argv[0]=="unset")
+**          bash : t_bash*
+** Return:  int   cumulative status
 */
 int	ft_unset(char **argv, t_bash *bash)
 {

@@ -6,12 +6,22 @@
 /*   By: chrrodri <chrrodri@student.42barcelona.co  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/18 23:25:00 by chrrodri          #+#    #+#             */
-/*   Updated: 2025/09/23 22:21:11 by chrrodri         ###   ########.fr       */
+/*   Updated: 2025/09/25 15:20:04 by chrrodri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../../include/minishell.h"
+#include "minishell.h"
 
+/* -------------------------------------------------------------------------- */
+/* Wildcard entry point: replace unquoted WORDs that contain '*'              */
+/* with a sorted list of filename tokens (or leave literal when no match).    */
+/* -------------------------------------------------------------------------- */
+
+/*
+** get_tail
+** --------
+** Return the last node of a token list (or NULL).
+*/
 static t_token	*get_tail(t_token *n)
 {
 	while (n && n->next)
@@ -21,6 +31,16 @@ static t_token	*get_tail(t_token *n)
 	return (n);
 }
 
+/*
+** replace_with_matches
+** --------------------
+** For the current WORD (*curr) containing '*':
+**   - Build the match list via wildcard_match (sorted, with space_before set).
+**   - Splice matches into the list in place of *curr.
+**   - Free the original *curr node.
+** Returns the last token of the inserted block (tail) to resume iteration.
+** If no matches found, leaves the list unchanged and returns prev.
+*/
 static t_token	*replace_with_matches(t_token **tokens, t_token *prev,
 		t_token **curr)
 {
@@ -42,6 +62,14 @@ static t_token	*replace_with_matches(t_token **tokens, t_token *prev,
 	return (tail);
 }
 
+/*
+** expand_wildcards
+** ----------------
+** Iterate over the token list:
+**   - If token is WORD, unquoted, and contains '*',
+**       expand via replace_with_matches.
+**   - Otherwise move to next token.
+*/
 void	expand_wildcards(t_token **tokens)
 {
 	t_token	*prev;

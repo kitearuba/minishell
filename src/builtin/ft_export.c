@@ -6,12 +6,24 @@
 /*   By: chrrodri <chrrodri@student.42barcelona.co  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/05 10:43:48 by chrrodri          #+#    #+#             */
-/*   Updated: 2025/09/19 13:01:30 by chrrodri         ###   ########.fr       */
+/*   Updated: 2025/09/25 15:33:59 by chrrodri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../../include/minishell.h"
+#include "minishell.h"
 
+/* -------------------------------------------------------------------------- */
+/* Update existing KEY=... or append new var                                  */
+/* -------------------------------------------------------------------------- */
+/*
+** update_or_add_env (file-local)
+** ------------------------------
+** If `arg` contains '=', replaces KEY's entry; otherwise no-op (returns 0).
+**
+** Params:  env : char*** environment vector ref
+**          arg : "KEY" or "KEY=VAL"
+** Return:  int  0 on success, 1 on alloc failure
+*/
 static int	update_or_add_env(char ***env, const char *arg)
 {
 	int		i;
@@ -41,6 +53,9 @@ static int	update_or_add_env(char ***env, const char *arg)
 	return (append_env_var(env, arg));
 }
 
+/* -------------------------------------------------------------------------- */
+/* In-place bubble sort of a NULL-terminated vector                           */
+/* -------------------------------------------------------------------------- */
 static void	sort_env_copy(char **copy)
 {
 	int		i;
@@ -64,6 +79,14 @@ static void	sort_env_copy(char **copy)
 	}
 }
 
+/* -------------------------------------------------------------------------- */
+/* Print `export` sorted view                                                 */
+/* -------------------------------------------------------------------------- */
+/*
+** print_export_sorted (file-local)
+** --------------------------------
+** Makes a deep copy of env, sorts it, and prints "declare -x <entry>" lines.
+*/
 static void	print_export_sorted(char **env)
 {
 	char	**copy;
@@ -79,6 +102,16 @@ static void	print_export_sorted(char **env)
 	free_2d_array(copy);
 }
 
+/* -------------------------------------------------------------------------- */
+/* Validate identifier and perform export mutation                            */
+/* -------------------------------------------------------------------------- */
+/*
+** handle_export_arg (file-local)
+** ------------------------------
+** Validates arg's KEY (before '='); prints bash-like error if invalid.
+**
+** Return: int (0 ok, 1 on error/alloc failure)
+*/
 static int	handle_export_arg(char *arg, t_bash *bash)
 {
 	char	*eq;
@@ -107,6 +140,23 @@ static int	handle_export_arg(char *arg, t_bash *bash)
 	return (0);
 }
 
+/* -------------------------------------------------------------------------- */
+/* builtin: export                                                            */
+/* -------------------------------------------------------------------------- */
+/*
+** ft_export
+** ---------
+** Behavior:
+**  - No args: print sorted "declare -x KEY=VAL" listing.
+**  - With args: for each KEY or KEY=VAL:
+**      * invalid identifier -> error to stderr, cumulative status=1
+**      * KEY                 -> no change (bash-compatible)
+**      * KEY=VAL             -> add or replace
+**
+** Params:  argv : char**  (argv[0]=="export")
+**          bash : t_bash*
+** Return:  int  0 if all ok, 1 if any arg invalid/failed
+*/
 int	ft_export(char **argv, t_bash *bash)
 {
 	int	i;

@@ -1,18 +1,27 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   parse_utils.c                                      :+:      :+:    :+:   */
+/*   handle_parse_redirection.c                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: chrrodri <chrrodri@student.42barcelona.co  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/29 14:15:32 by chrrodri          #+#    #+#             */
-/*   Updated: 2025/09/25 12:14:59 by chrrodri         ###   ########.fr       */
+/*   Updated: 2025/09/25 15:22:49 by chrrodri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minishell.h"
 
-/* filename token types allowed to be glued without space */
+/* -------------------------------------------------------------------------- */
+/* Redirection filename collection (handles token glue across words/quotes)   */
+/* -------------------------------------------------------------------------- */
+
+/*
+** is_filename_token
+** -----------------
+** Return 1 if token type can be glued into a filename:
+**   WORD, SINGLE_QUOTE, DOUBLE_QUOTE, ENV_VAR. Else 0.
+*/
 static int	is_filename_token(t_token *t)
 {
 	if (!t)
@@ -23,7 +32,12 @@ static int	is_filename_token(t_token *t)
 	return (0);
 }
 
-/* check syntax: need a filename token after a redirection */
+/*
+** missing_redir_filename
+** ----------------------
+** True when a redirection is not followed by a valid filename token:
+**   - no next, or next is PIPE, or another redirection.
+*/
 static int	missing_redir_filename(t_token *tok)
 {
 	if (!tok->next)
@@ -35,8 +49,13 @@ static int	missing_redir_filename(t_token *tok)
 	return (0);
 }
 
-/* build filename from tok->next and following glued tokens; consumes 
- * next nodes */
+/*
+** collect_filename
+** ----------------
+** Starting at 'cur' (first filename token), concatenate subsequent glued
+** tokens (space_before==0) into one malloc'ed string. Consumes the linked
+** tokens it merges (frees nodes/values). Returns the joined filename or NULL.
+*/
 static char	*collect_filename(t_token *cur)
 {
 	char	*name;
@@ -60,6 +79,13 @@ static char	*collect_filename(t_token *cur)
 	return (name);
 }
 
+/*
+** handle_parse_redirection
+** ------------------------
+** Validate and collect the redirection target (handles glued tokens),
+** propagate heredoc 'quoted' flag, and call add_redirection.
+** Returns 0 on success, 1 on error (and frees *current).
+*/
 int	handle_parse_redirection(t_token *tok, t_command **current)
 {
 	t_token	*cur;

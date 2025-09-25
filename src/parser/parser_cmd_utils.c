@@ -6,12 +6,22 @@
 /*   By: chrrodri <chrrodri@student.42barcelona.co  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/19 16:10:35 by chrrodri          #+#    #+#             */
-/*   Updated: 2025/09/23 22:27:56 by chrrodri         ###   ########.fr       */
+/*   Updated: 2025/09/25 15:24:14 by chrrodri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../../include/minishell.h"
 
+/* -------------------------------------------------------------------------- */
+/* Parser: list → argv conversion and command finalization                    */
+/* -------------------------------------------------------------------------- */
+
+/*
+** list_len
+** --------
+** Count number of nodes in a t_list* of argument strings.
+** Returns the length (>= 0).
+*/
 static int	list_len(t_list *args)
 {
 	int		n;
@@ -27,6 +37,12 @@ static int	list_len(t_list *args)
 	return (n);
 }
 
+/*
+** list_to_argv
+** ------------
+** Convert a t_list* of char* into a NULL-terminated argv vector.
+** Duplicates each string. Returns malloc'ed **argv or NULL on failure.
+*/
 char	**list_to_argv(t_list *args)
 {
 	char	**argv;
@@ -55,6 +71,12 @@ char	**list_to_argv(t_list *args)
 	return (argv);
 }
 
+/*
+** finalize_cmd
+** ------------
+** Attach current args list to *current as argv, free the list nodes,
+** and append *current to the command chain (*head). Sets *current = NULL.
+*/
 void	finalize_cmd(t_command **head, t_command **current, t_list **args)
 {
 	t_list	*tmp;

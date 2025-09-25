@@ -12,6 +12,15 @@
 
 #include "minishell.h"
 
+/*
+** main
+** ----
+** Entry point. Initializes shell state from the host env, then starts the
+** interactive loop. On early init failure, print the required "exit" line and
+** return with failure. 'ac' and 'av' are unused by design (subject rules).
+**
+** Return: 0 on clean exit (loop never returns), 1 on early init failure.
+*/
 int	main(int ac, char **av, char **envp)
 {
 	t_bash	bash;

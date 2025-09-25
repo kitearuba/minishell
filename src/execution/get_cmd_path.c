@@ -6,12 +6,13 @@
 /*   By: chrrodri <chrrodri@student.42barcelona.co  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/20 15:30:00 by chrrodri          #+#    #+#             */
-/*   Updated: 2025/09/19 13:50:23 by chrrodri         ###   ########.fr       */
+/*   Updated: 2025/09/25 15:14:17 by chrrodri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../../include/minishell.h"
+#include "minishell.h"
 
+/* Build "dir/ cmd" path string. Returns malloc'ed string or NULL. */
 static char	*construct_cmd_path(const char *dir, const char *cmd)
 {
 	char	*path;
@@ -29,6 +30,8 @@ static char	*construct_cmd_path(const char *dir, const char *cmd)
 	return (path);
 }
 
+/* Iterate PATH split dirs looking for an executable 'cmd'.
+ * Returns malloc'ed path or NULL. */
 static char	*search_cmd_in_path(char **dirs, const char *cmd)
 {
 	int		i;
@@ -50,6 +53,22 @@ static char	*search_cmd_in_path(char **dirs, const char *cmd)
 	return (NULL);
 }
 
+/* -------------------------------------------------------------------------- */
+/* Resolve argv[0] against PATH                                               */
+/* -------------------------------------------------------------------------- */
+/*
+** get_cmd_path
+** ------------
+** If 'cmd' contains '/', return NULL(caller should treat it as a literal path).
+** Otherwise, search PATH & return malloc'ed absolute path on success, or NULL.
+**
+** Params:
+**   cmd  : const char* - program name (no '/')
+**   envp : char**      - environment to read PATH from
+**
+** Returns:
+**   char*          - malloc'ed absolute path, or NULL if not found / PATH empty
+*/
 char	*get_cmd_path(const char *cmd, char **envp)
 {
 	char	**dirs;

@@ -6,13 +6,20 @@
 /*   By: chrrodri <chrrodri@student.42barcelona.co  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/23 15:15:58 by chrrodri          #+#    #+#             */
-/*   Updated: 2025/09/23 22:26:11 by chrrodri         ###   ########.fr       */
+/*   Updated: 2025/09/25 15:21:33 by chrrodri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../../include/minishell.h"
+#include "minishell.h"
 
-/* Basic '*' matcher, no '?', recursive, bash-like. */
+/*
+** match_pattern
+** -------------
+** Simple glob matcher supporting '*' only:
+**   '*' matches any (possibly empty) substring
+**   other characters match literally
+** Returns 1 on match, 0 otherwise.
+*/
 int	match_pattern(const char *p, const char *s)
 {
 	if (!*p && !*s)

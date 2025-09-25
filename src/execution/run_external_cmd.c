@@ -6,12 +6,13 @@
 /*   By: chrrodri <chrrodri@student.42barcelona.co  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/20 15:15:58 by chrrodri          #+#    #+#             */
-/*   Updated: 2025/09/19 16:08:20 by bsamy            ###   ########.fr       */
+/*   Updated: 2025/09/25 15:17:49 by chrrodri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../../include/minishell.h"
+#include "minishell.h"
 
+/* Print the correct "not found" message depending on PATH presence. */
 static void	print_cmd_not_found(const char *cmd, t_bash *bash)
 {
 	char	*path_val;
@@ -25,6 +26,8 @@ static void	print_cmd_not_found(const char *cmd, t_bash *bash)
 			"minishell: %s: command not found\n", cmd);
 }
 
+/* Wait for child, map signals (130/131...) and exits to bash->exit_status;
+ * return it. */
 static int	wait_and_set_status(pid_t pid, t_bash *bash)
 {
 	int	status;
@@ -48,6 +51,8 @@ static int	wait_and_set_status(pid_t pid, t_bash *bash)
 	return (bash->exit_status);
 }
 
+/* Fork + execve path with current env; manage parent/child signal masks;
+ * return exit status. */
 static int	spawn_child(const char *cmd_path, char **args, t_bash *bash)
 {
 	pid_t	pid;
@@ -72,6 +77,8 @@ static int	spawn_child(const char *cmd_path, char **args, t_bash *bash)
 	return (bash->exit_status);
 }
 
+/* Validate a literal path (stat/dir/perm) and execute via spawn_child;
+ * return status (126/127/etc). */
 static int	run_path_cmd(char *path, char **args, t_bash *bash)
 {
 	struct stat	st;
@@ -97,6 +104,22 @@ static int	run_path_cmd(char *path, char **args, t_bash *bash)
 	return (spawn_child(path, args, bash));
 }
 
+/* -------------------------------------------------------------------------- */
+/* Execute an external command (PATH lookup or literal path)                  */
+/* -------------------------------------------------------------------------- */
+/*
+** exec_external
+** -------------
+** If argv[0] contains '/', treat it as a literal path and validate/exec.
+** Otherwise resolve via PATH and exec. On failure, set 126/127 accordingly.
+**
+** Params:
+**   args : char**  - argument vector
+**   bash : t_bash* - shell state (env, exit_status)
+**
+** Returns:
+**   int            - final exit status (also stored in bash->exit_status)
+*/
 int	exec_external(char **args, t_bash *bash)
 {
 	char	*cmd_path;

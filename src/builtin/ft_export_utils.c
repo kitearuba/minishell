@@ -6,12 +6,24 @@
 /*   By: chrrodri <chrrodri@student.42barcelona.co> +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/18 23:25:00 by chrrodri          #+#    #+#             */
-/*   Updated: 2025/08/07 05:30:00 by chrrodri         ###   ########.fr       */
+/*   Updated: 2025/09/25 15:07:44 by chrrodri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../../include/minishell.h"
+#include "minishell.h"
 
+/* -------------------------------------------------------------------------- */
+/* Append one "KEY=VAL" entry to env (deep copy)                              */
+/* -------------------------------------------------------------------------- */
+/*
+** append_env_var
+** --------------
+** Reallocates env vector +1, duplicates strings, frees old env on success.
+**
+** Params:  env     : char*** environment vector ref
+**          new_var : const char* "KEY=VAL"
+** Return:  int     0 on success, 1 on alloc failure
+*/
 int	append_env_var(char ***env, const char *new_var)
 {
 	int		i;

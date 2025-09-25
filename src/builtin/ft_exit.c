@@ -6,14 +6,19 @@
 /*   By: chrrodri <chrrodri@student.42barcelona.co  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/18 19:03:58 by chrrodri          #+#    #+#             */
-/*   Updated: 2025/09/19 13:12:22 by chrrodri         ###   ########.fr       */
+/*   Updated: 2025/09/25 15:06:59 by chrrodri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../../include/minishell.h"
 
+/* -------------------------------------------------------------------------- */
+/* Validate [+|-]?[0-9]+                                                      */
+/* -------------------------------------------------------------------------- */
 /*
-** Returns 1 if s is a valid [+|-]?[0-9]+ string, else 0.
+** is_num_str (file-local)
+** -----------------------
+** Returns 1 if s is a valid signed decimal integer, else 0.
 */
 static int	is_num_str(const char *s)
 {
@@ -35,8 +40,13 @@ static int	is_num_str(const char *s)
 	return (1);
 }
 
+/* -------------------------------------------------------------------------- */
+/* Simple ASCII -> long long (no overflow checks)                             */
+/* -------------------------------------------------------------------------- */
 /*
-** Simple ascii to long long for signed decimal (no overflow checks).
+** atoll_s (file-local)
+** --------------------
+** Parses signed decimal into long long. UB on overflow (OK for minishell).
 */
 static long long	atoll_s(const char *s)
 {
@@ -59,9 +69,9 @@ static long long	atoll_s(const char *s)
 	return (res * sign);
 }
 
-/*
-** Count argv items.
-*/
+/* -------------------------------------------------------------------------- */
+/* Count argv items                                                           */
+/* -------------------------------------------------------------------------- */
 static int	args_count(char **argv)
 {
 	int	i;
@@ -72,15 +82,32 @@ static int	args_count(char **argv)
 	return (i);
 }
 
-/*
-** Print "exit" and terminate with status.
-*/
+/* -------------------------------------------------------------------------- */
+/* Print "exit" and terminate via free_all_and_exit                           */
+/* -------------------------------------------------------------------------- */
 static void	exit_shell(t_bash *bash, int status)
 {
 	ft_printf_fd(STDOUT_FILENO, "exit\n");
 	free_all_and_exit(bash, status);
 }
 
+/* -------------------------------------------------------------------------- */
+/* builtin: exit                                                              */
+/* -------------------------------------------------------------------------- */
+/*
+** ft_exit
+** -------
+** Behavior (bash-compatible):
+**  - no args        : print "exit", exit with current $?.
+**  - 1 numeric arg  : print "exit", exit with (unsigned char)value.
+**  - 1 non-numeric  : print error, exit with 2.
+**  - >=2 args and argv[1] numeric: print error "too many arguments", do not
+**    exit, set status=1 and return 1.
+**
+** Params:  argv : char** (argv[0]=="exit")
+**          bash : t_bash*
+** Return:  int  only returns on "too many arguments" path (1), else no return.
+*/
 int	ft_exit(char **argv, t_bash *bash)
 {
 	int			ac;

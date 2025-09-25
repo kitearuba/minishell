@@ -1,17 +1,27 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   parse_utils2.c                                     :+:      :+:    :+:   */
+/*   parse_utils.c                                      :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: chrrodri <chrrodri@student.42barcelona.co  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/07 01:35:00 by chrrodri          #+#    #+#             */
-/*   Updated: 2025/09/25 12:24:20 by chrrodri         ###   ########.fr       */
+/*   Updated: 2025/09/25 15:23:36 by chrrodri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minishell.h"
 
+/* -------------------------------------------------------------------------- */
+/* Parser helpers: error cleanup, redirection add, argument aggregation       */
+/* -------------------------------------------------------------------------- */
+
+/*
+** handle_parse_error
+** ------------------
+** Common cleanup on parse failure:
+**   - free command chains and arg list; return NULL.
+*/
 t_command	*handle_parse_error(
 		t_command *head, t_command *current, t_list *args)
 {
@@ -24,6 +34,12 @@ t_command	*handle_parse_error(
 	return (NULL);
 }
 
+/*
+** add_redirection
+** ---------------
+** Append a redirection node (type, filename, quoted flag) to 'cmd'.
+** Duplicates filename. No-op on allocation error.
+*/
 void	add_redirection(t_command *cmd, int type, char *filename, int quoted)
 {
 	t_redirection	*rd;
@@ -52,6 +68,12 @@ void	add_redirection(t_command *cmd, int type, char *filename, int quoted)
 	}
 }
 
+/*
+** add_token_argument
+** ------------------
+** Append 'tok->value' to args; if 'tok->space_before == 0' and args exists,
+** concatenate to the last arg (token glue). Duplicates strings.
+*/
 void	add_token_argument(t_token *tok, t_list **args)
 {
 	t_list	*last;
@@ -72,6 +94,13 @@ void	add_token_argument(t_token *tok, t_list **args)
 	ft_lstadd_back(args, ft_lstnew(dup));
 }
 
+/*
+** handle_redirection
+** ------------------
+** Validate presence of filename token after a redirection and attach it
+** to *current via add_redirection (heredoc keeps quoted flag of the word).
+** Returns 0 on success, 1 on syntax error (and frees *current).
+*/
 int	handle_redirection(t_token *tok, t_command **current, t_list **args)
 {
 	int	quoted;
@@ -92,6 +121,12 @@ int	handle_redirection(t_token *tok, t_command **current, t_list **args)
 	return (0);
 }
 
+/*
+** handle_token_type
+** -----------------
+** If 'tok' is a filename/word-like token (WORD, SQ, DQ, ENV_VAR),
+** push/concatenate into args. Always returns 0.
+*/
 int	handle_token_type(t_token *tok, t_command **current, t_list **args)
 {
 	(void)current;

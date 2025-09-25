@@ -6,12 +6,13 @@
 /*   By: chrrodri <chrrodri@student.42barcelona.co  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/20 15:15:58 by chrrodri          #+#    #+#             */
-/*   Updated: 2025/09/19 13:56:49 by chrrodri         ###   ########.fr       */
+/*   Updated: 2025/09/25 15:16:00 by chrrodri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../../include/minishell.h"
+#include "minishell.h"
 
+/* Temp switch parent signal handlers during heredoc (0=ignore, 1=restore). */
 static void	hd_parent_signals(int enable)
 {
 	if (enable == 0)
@@ -25,6 +26,8 @@ static void	hd_parent_signals(int enable)
 	}
 }
 
+/* Read heredoc lines into wfd until limiter is met; 
+ * expands $VAR when not quoted. */
 static void	hd_read_loop(int wfd, const char *lim, int quoted, t_bash *bash)
 {
 	char	*line;
@@ -54,6 +57,7 @@ static void	hd_read_loop(int wfd, const char *lim, int quoted, t_bash *bash)
 	}
 }
 
+/* Fork the heredoc reader child and return its pid; pipefd must be open(). */
 static pid_t	hd_spawn(int *pipefd, const char *lim, int quoted, t_bash *bash)
 {
 	pid_t	pid;
@@ -73,6 +77,8 @@ static pid_t	hd_spawn(int *pipefd, const char *lim, int quoted, t_bash *bash)
 	return (pid);
 }
 
+/* Inspect child status.
+ * On SIGINT: print newline, set $?=130, close rfd, return -1; else rfd. */
 static int	hd_handle_status(int rfd, int status, t_bash *bash)
 {
 	if (WIFSIGNALED(status) && WTERMSIG(status) == SIGINT)
@@ -91,6 +97,23 @@ static int	hd_handle_status(int rfd, int status, t_bash *bash)
 	return (rfd);
 }
 
+/* -------------------------------------------------------------------------- */
+/* Create a heredoc reader and return an FD connected to its output           */
+/* -------------------------------------------------------------------------- */
+/*
+** handle_heredoc
+** --------------
+** Spawns a child that reads lines until 'redir->filename' delimiter.
+** If delimiter was quoted, expansions are disabled. 
+** On Ctrl-C, returns -1 and sets $?=130.
+**
+** Params:
+**   redir : t_redirection* - heredoc node (uses filename + quoted)
+**   bash  : t_bash*        - shell state (exit_status may be updated)
+**
+** Returns:
+**   int                 - readable FD on success; -1 on error (SIGINT or other)
+*/
 int	handle_heredoc(t_redirection *redir, t_bash *bash)
 {
 	int		pipefd[2];

@@ -6,12 +6,38 @@
 /*   By: chrrodri <chrrodri@student.42barcelona.co> +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/18 06:10:00 by chrrodri          #+#    #+#             */
-/*   Updated: 2025/09/19 13:43:46 by chrrodri         ###   ########.fr       */
+/*   Updated: 2025/09/25 15:11:29 by chrrodri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../../include/minishell.h"
 
+/* -------------------------------------------------------------------------- */
+/* Env mutation (replace or append "KEY=VALUE" entries)                       */
+/* -------------------------------------------------------------------------- */
+/*
+** Contract:
+** - bash->env is a NULL-terminated array fully owned by the shell.
+** - env_set() builds "KEY=VALUE" and either replaces an existing entry
+**   (exact "KEY=" match) or reallocates the vector and appends.
+** - On success returns 0; on allocation/argument error returns 1.
+**
+** Notes:
+** - Passing val == NULL results in "KEY=" (empty value), not a deletion.
+** - Returned pointers are owned by the env vector; callers should NOT free
+**   env entries directly (except inside these helpers).
+*/
+
+/*
+** env_find_index
+** --------------
+** Find the index of 'key' within env ("KEY=" exact match).
+** Returns the index (>=0) or -1 if not present.
+**
+** Params:
+**   env : char**        - environment vector
+**   key : const char*   - variable name (no '=')
+*/
 static int	env_find_index(char **env, const char *key)
 {
 	int		i;
@@ -30,6 +56,19 @@ static int	env_find_index(char **env, const char *key)
 	return (-1);
 }
 
+/*
+** env_make_entry
+** --------------
+** Build a freshly-allocated "KEY=VAL" C-string. If 'val' is NULL, produce
+** "KEY=" (empty value).
+**
+** Params:
+**   key : const char*   - variable name (required, non-empty)
+**   val : const char*   - value (may be NULL)
+**
+** Returns:
+**   char*               - malloc'ed "KEY=VAL" or NULL on error.
+*/
 static char	*env_make_entry(const char *key, const char *val)
 {
 	char	*entry;
@@ -54,6 +93,17 @@ static char	*env_make_entry(const char *key, const char *val)
 	return (entry);
 }
 
+/*
+** env_replace
+** -----------
+** Replace env[idx] with 'entry'. Frees the previous entry.
+** Returns 0 on success, 1 on invalid idx or NULL entry.
+**
+** Params:
+**   bash  : t_bash*  - shell state (owns env)
+**   idx   : int      - index to replace (>=0)
+**   entry : char*    - malloc'ed "KEY=VAL" to take ownership of
+*/
 static int	env_replace(t_bash *bash, int idx, char *entry)
 {
 	if (idx < 0 || !entry)
@@ -63,6 +113,16 @@ static int	env_replace(t_bash *bash, int idx, char *entry)
 	return (0);
 }
 
+/*
+** env_append
+** ----------
+** Reallocate env to add a new entry at the end. Takes ownership of 'entry'.
+** Returns 0 on success, 1 on allocation failure (and frees 'entry').
+**
+** Params:
+**   bash  : t_bash*  - shell state (owns env)
+**   entry : char*    - malloc'ed "KEY=VAL" to append
+*/
 static int	env_append(t_bash *bash, char *entry)
 {
 	int		i;
@@ -92,6 +152,21 @@ static int	env_append(t_bash *bash, char *entry)
 	return (0);
 }
 
+/*
+** env_set
+** -------
+** Public API. Create/replace "KEY=VAL" in bash->env.
+**   - If KEY exists, replace in place.
+**   - If KEY doesn't exist, append (reallocates env vector).
+**
+** Returns:
+**   0 on success; 1 on allocation/argument error.
+**
+** Params:
+**   bash : t_bash*        - shell state
+**   key  : const char*    - variable name (required, non-empty)
+**   val  : const char*    - value (may be NULL -> empty value)
+*/
 int	env_set(t_bash *bash, const char *key, const char *val)
 {
 	int		idx;

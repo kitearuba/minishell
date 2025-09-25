@@ -6,12 +6,22 @@
 /*   By: chrrodri <chrrodri@student.42barcelona.co  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/25 14:15:32 by chrrodri          #+#    #+#             */
-/*   Updated: 2025/09/19 16:27:22 by chrrodri         ###   ########.fr       */
+/*   Updated: 2025/09/25 15:29:07 by chrrodri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../../include/minishell.h"
+#include "minishell.h"
 
+/* -------------------------------------------------------------------------- */
+/* Top-level parser: tokens -> command list (argv + redirections + pipes)     */
+/* -------------------------------------------------------------------------- */
+
+/*
+** begin_command_if_needed
+** -----------------------
+** When *current is NULL, run early checks and allocate a new command.
+** On error, clears *args and returns 1; else 0.
+*/
 static int	begin_command_if_needed(t_token *tok, t_command **current,
 		t_list **args)
 {
@@ -32,6 +42,17 @@ static int	begin_command_if_needed(t_token *tok, t_command **current,
 	return (0);
 }
 
+/*
+** process_token
+** -------------
+** Consume one token and update parse state:
+**   - redirection: validate filename, attach, and advance by two tokens
+**     (returns 2 to signal caller to 'continue')
+**   - word-like: append into args
+**   - pipe: finalize current command and keep parsing
+** Returns 0 on success, 1 on error, i
+**    or 2 to indicate "skip advance already done".
+*/
 static int	process_token(t_token **ptok, t_command **head,
 		t_command **current, t_list **args)
 {
@@ -61,6 +82,12 @@ static int	process_token(t_token **ptok, t_command **head,
 	return (0);
 }
 
+/*
+** parse_loop
+** ----------
+** Main loop over tokens: ensure a command exists, check '||', then
+** delegate to process_token. Returns 0 on success, 1 on error.
+*/
 static int	parse_loop(t_command **head, t_command **current,
 		t_list **args, t_token *tok)
 {
@@ -84,6 +111,16 @@ static int	parse_loop(t_command **head, t_command **current,
 	return (0);
 }
 
+/*
+** check_parse_errors
+** ------------------
+** Final validation after the loop:
+**   - empty input -> NULL
+**   - finalize pending command
+**   - trailing pipe / orphan redirection -> errors
+**   - no head -> error "no command given"
+** Returns head or NULL.
+*/
 static t_command	*check_parse_errors(t_command *head,
 		t_command *current, t_list *args, t_token *tokens)
 {
@@ -107,6 +144,12 @@ static t_command	*check_parse_errors(t_command *head,
 	return (head);
 }
 
+/*
+** parse_tokens
+** ------------
+** Public API. Build a pipeline list from the token stream.
+** On syntax error prints message(s) and returns NULL.
+*/
 t_command	*parse_tokens(t_token *tokens)
 {
 	t_command	*head;
