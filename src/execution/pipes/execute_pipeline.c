@@ -12,44 +12,39 @@
 
 #include "minishell.h"
 
-/* -------------------------------------------------------------------------- */
-/* Execute one stage of a pipeline in a child                                 */
-/* -------------------------------------------------------------------------- */
 /*
 ** child_process
 ** -------------
-** Wire input_fd -> STDIN and output_fd -> STDOUT, apply redirections for the
-** given command, set child signal handlers, and exec the program. On any
-** failure before exec, exit(1); if redirections fail, exit(st) where st is the
-** redirection error code (e.g., 130 for heredoc SIGINT).
-**
-** Params:
-**   cmd       : t_command* - pipeline stage (argv + redirections)
-**   input_fd  : int        - fd to dup to STDIN
-**   output_fd : int        - fd to dup to STDOUT
-**   bash      : t_bash*    - shell state for env and cleanup on fatal errors
+** Wire fds, apply redirs, then:
+**  - if builtin: run and exit with its status
+**  - else: execve
 */
 static void	child_process(
-	t_command *cmd, int input_fd, int output_fd, t_bash *bash)
+    t_command *cmd, int input_fd, int output_fd, t_bash *bash)
 {
-	int	st;
+    int	st;
 
-	if (dup2(input_fd, STDIN_FILENO) == -1
-		|| dup2(output_fd, STDOUT_FILENO) == -1)
-		free_all_and_exit(bash, 1);
-	if (input_fd != STDIN_FILENO)
-		close(input_fd);
-	if (output_fd != STDOUT_FILENO)
-		close(output_fd);
-	setup_child_signals();
-	st = 0;
-	if (cmd->redirection)
-	{
-		st = apply_redirections(cmd->redirection, bash);
-		if (st != 0)
-			free_all_and_exit(bash, st);
-	}
-	execve_cmd(cmd->argv, bash->env, bash);
+    if (dup2(input_fd, STDIN_FILENO) == -1
+        || dup2(output_fd, STDOUT_FILENO) == -1)
+        free_all_and_exit(bash, 1);
+    if (input_fd != STDIN_FILENO)
+        close(input_fd);
+    if (output_fd != STDOUT_FILENO)
+        close(output_fd);
+    setup_child_signals();
+    st = 0;
+    if (cmd->redirection)
+    {
+        st = apply_redirections(cmd->redirection, bash);
+        if (st != 0)
+            free_all_and_exit(bash, st);
+    }
+    if (cmd->argv && cmd->argv[0] && is_builtin(cmd->argv[0]))
+    {
+        st = run_builtin(cmd->argv, bash);
+        free_all_and_exit(bash, st);
+    }
+    execve_cmd(cmd->argv, bash->env, bash);
 }
 
 /* -------------------------------------------------------------------------- */

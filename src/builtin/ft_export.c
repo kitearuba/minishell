@@ -79,27 +79,45 @@ static void	sort_env_copy(char **copy)
 	}
 }
 
-/* -------------------------------------------------------------------------- */
-/* Print `export` sorted view                                                 */
-/* -------------------------------------------------------------------------- */
-/*
-** print_export_sorted (file-local)
-** --------------------------------
-** Makes a deep copy of env, sorts it, and prints "declare -x <entry>" lines.
-*/
+/* print one line in bash style: declare -x KEY="VAL" or declare -x KEY */
+static void print_export_line(const char *entry)
+{
+    const char *eq;
+    size_t      keylen;
+
+    if (!entry)
+        return ;
+    eq = ft_strchr(entry, '=');
+    if (!eq)
+    {
+        ft_printf("declare -x %s\n", entry);
+        return ;
+    }
+    keylen = (size_t)(eq - entry);
+    write(1, "declare -x ", 11);
+    write(1, entry, keylen);
+    write(1, "=\"", 2);
+    ft_printf("%s", eq + 1);
+    write(1, "\"\n", 2);
+}
+
+/* Makes a deep copy, sorts it, and prints bash-like "declare -x ..." */
 static void	print_export_sorted(char **env)
 {
-	char	**copy;
-	int		i;
+    char	**copy;
+    int		i;
 
-	copy = copy_env(env);
-	if (!copy)
-		return ;
-	sort_env_copy(copy);
-	i = -1;
-	while (copy[++i])
-		printf("declare -x %s\n", copy[i]);
-	free_2d_array(copy);
+    copy = copy_env(env);
+    if (!copy)
+        return ;
+    sort_env_copy(copy);
+    i = 0;
+    while (copy[i])
+    {
+        print_export_line(copy[i]);
+        i++;
+    }
+    free_2d_array(copy);
 }
 
 /* -------------------------------------------------------------------------- */
