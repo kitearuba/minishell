@@ -27,4 +27,6 @@ int		ft_exit(char **argv, t_bash *bash);
 int		is_valid_identifier(const char *str);
 char	**copy_env(char **env);
 
+int ft_error_handling(char *eq, char *name, t_bash *bash, char *arg);
+
 #endif /* BUILTIN_H */
