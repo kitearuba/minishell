@@ -6,7 +6,7 @@
 /*   By: chrrodri <chrrodri@student.42barcelona.co  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/18 23:25:00 by chrrodri          #+#    #+#             */
-/*   Updated: 2025/09/25 15:25:01 by chrrodri         ###   ########.fr       */
+/*   Updated: 2025/10/03 15:21:00 by chrrodri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,6 +31,8 @@ void	free_all_and_exit(t_bash *bash, int exit_code)
 	{
 		if (bash->env)
 			free_2d_array(bash->env);
+		if (bash->export_noval)
+			free_2d_array(bash->export_noval);
 		if (bash->tokens)
 			free_tokens(bash->tokens);
 		if (bash->commands)

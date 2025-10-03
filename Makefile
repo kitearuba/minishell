@@ -55,6 +55,7 @@ SRC = 	minishell.c \
 		$(SRC_DIR)/expand/wildcard_utils_2.c \
 		$(SRC_DIR)/env/ft_getenv.c \
 		$(SRC_DIR)/env/env_set.c \
+		$(SRC_DIR)/env/export_noval.c \
 		$(SRC_DIR)/utils/free_2d_array.c \
 		$(SRC_DIR)/utils/free_tokens.c \
 		$(SRC_DIR)/utils/free_commands.c \
@@ -76,6 +77,7 @@ SRC = 	minishell.c \
         $(SRC_DIR)/builtin/ft_pwd.c \
         $(SRC_DIR)/builtin/ft_export.c \
         $(SRC_DIR)/builtin/ft_export_utils.c \
+        $(SRC_DIR)/builtin/export_view.c \
         $(SRC_DIR)/builtin/ft_unset.c \
         $(SRC_DIR)/builtin/ft_env.c \
         $(SRC_DIR)/builtin/ft_exit.c \

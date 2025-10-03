@@ -6,7 +6,7 @@
 /*   By: chrrodri <chrrodri@student.42barcelona.co  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/19 17:59:43 by chrrodri          #+#    #+#             */
-/*   Updated: 2025/09/25 15:10:47 by chrrodri         ###   ########.fr       */
+/*   Updated: 2025/10/03 15:34:09 by chrrodri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -92,5 +92,6 @@ int	init_minishell(t_bash *bash, char **envp)
 	bash->exit_status = 0;
 	bash->tokens = NULL;
 	bash->commands = NULL;
+	bash->export_noval = NULL;
 	return (0);
 }

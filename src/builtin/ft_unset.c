@@ -6,7 +6,7 @@
 /*   By: chrrodri <chrrodri@student.42barcelona.co  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/07 01:34:05 by chrrodri          #+#    #+#             */
-/*   Updated: 2025/09/25 15:33:19 by chrrodri         ###   ########.fr       */
+/*   Updated: 2025/10/03 16:08:50 by chrrodri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -85,16 +85,7 @@ static int	env_remove_at(t_bash *bash, int idx)
 	return (0);
 }
 
-/* -------------------------------------------------------------------------- */
-/* Unset a single key with print bash-like error on identifier validation     */
-/* -------------------------------------------------------------------------- */
-/*
-** unset_one (file-local)
-** ----------------------
-** Validates KEY; prints bash-like error if invalid. Removes from env if exists.
-**
-** Return: int 0 on success/no-op, 1 on error
-*/
+/* Unset a single key: validate, drop from export_noval list, then env */
 static int	unset_one(t_bash *bash, const char *key)
 {
 	int	idx;
@@ -102,10 +93,10 @@ static int	unset_one(t_bash *bash, const char *key)
 	if (!is_valid_identifier((char *)key))
 	{
 		ft_printf_fd(STDERR_FILENO,
-			"minishell: unset: `"
-			"%s': not a valid identifier\n", key);
+			"minishell: unset: `%s': not a valid identifier\n", key);
 		return (1);
 	}
+	export_list_remove(bash, key);
 	idx = env_index_of(bash->env, key);
 	if (idx >= 0 && env_remove_at(bash, idx) != 0)
 		return (1);

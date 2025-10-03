@@ -6,7 +6,7 @@
 /*   By: chrrodri <chrrodri@student.42barcelona.co  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/20 16:21:19 by chrrodri          #+#    #+#             */
-/*   Updated: 2025/09/25 16:04:28 by chrrodri         ###   ########.fr       */
+/*   Updated: 2025/10/03 16:05:38 by chrrodri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -152,6 +152,9 @@ char					*get_cmd_path(const char *cmd, char **envp);
 char					*ft_getenv(char **envp, char *key);
 int						env_set(t_bash *bash, const char *key,
 							const char *val);
+int						export_declare_name_only(t_bash *bash,
+							const char *name);
+void					export_list_remove(t_bash *bash, const char *name);
 
 /* ============================== SIGNALS ================================ */
 

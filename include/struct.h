@@ -6,7 +6,7 @@
 /*   By: chrrodri <chrrodri@student.42barcelona.co  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/20 16:21:19 by chrrodri          #+#    #+#             */
-/*   Updated: 2025/09/24 01:47:12 by chrrodri         ###   ########.fr       */
+/*   Updated: 2025/10/03 15:16:53 by chrrodri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -68,6 +68,7 @@ typedef struct s_bash
 	int			exit_status;
 	t_token		*tokens;
 	t_command	*commands;
+	char		**export_noval;
 }	t_bash;
 
 #endif /* STRUCT_H */
